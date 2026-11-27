@@ -1,0 +1,10 @@
+{
+  "name": "simple-online-pos/pos",
+  "description": "Optional PHPMailer dependency for POS email backups (the app also includes a dependency-free SMTP client).",
+  "require": {
+    "php": ">=8.1",
+    "ext-pdo": "*",
+    "ext-zip": "*",
+    "phpmailer/phpmailer": "^6.9"
+  }
+}

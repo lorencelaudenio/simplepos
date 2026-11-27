@@ -1,0 +1,19 @@
+# Local database credentials written by install.php
+/config/database.local.php
+
+# Uploaded/generated POS files (keep directory markers, ignore contents)
+/uploads/backups/*
+!/uploads/backups/.htaccess
+/uploads/imports/*
+!/uploads/imports/.htaccess
+
+# Composer-installed dependencies (PHPMailer is optional)
+/vendor/*
+!/vendor/.htaccess
+!/vendor/README.md
+
+# Local environment / logs / OS files
+.env
+*.log
+.DS_Store
+Thumbs.db
