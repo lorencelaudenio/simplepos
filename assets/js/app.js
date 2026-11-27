@@ -183,10 +183,34 @@
     });
   }
 
+  function sampleVideoFrame(video) {
+    try {
+      const size = 16;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) return null;
+      context.drawImage(video, 0, 0, size, size);
+      const pixels = context.getImageData(0, 0, size, size).data;
+      let sum = 0;
+      let sumSquares = 0;
+      const count = pixels.length / 4;
+      for (let index = 0; index < pixels.length; index += 4) {
+        const brightness = 0.299 * pixels[index] + 0.587 * pixels[index + 1] + 0.114 * pixels[index + 2];
+        sum += brightness;
+        sumSquares += brightness * brightness;
+      }
+      const mean = sum / count;
+      return { mean: mean, variance: sumSquares / count - mean * mean };
+    } catch (err) { return null; }
+  }
+
   function waitForVideo(hostId, milliseconds) {
     return new Promise(function (resolve) {
       const started = Date.now();
       let initialTime = null;
+      let blackSince = 0;
       function check() {
         const host = document.getElementById(hostId);
         const video = host ? host.querySelector('video') : null;
@@ -195,9 +219,19 @@
           if (initialTime === null) {
             initialTime = video.currentTime;
           } else if (video.currentTime > initialTime + 0.01) {
-            // The frame counter is advancing, so the preview is genuinely live.
-            resolve(true);
-            return;
+            const frame = sampleVideoFrame(video);
+            if (!frame || (frame.mean > 10 && frame.variance > 4)) {
+              // Frames are advancing and the image is not a solid black rectangle.
+              resolve(true);
+              return;
+            }
+            if (frame.mean <= 10 && frame.variance <= 4) {
+              if (!blackSince) blackSince = Date.now();
+              if (Date.now() - blackSince >= 1200) {
+                resolve(false);
+                return;
+              }
+            }
           }
         }
         if (Date.now() - started >= milliseconds) {
