@@ -85,7 +85,7 @@
       + '<label class="field">Reorder Level *<input id="f-reorder" type="number" min="0" step="1" inputmode="numeric" value="' + esc(product.reorder_level != null ? product.reorder_level : 0) + '" required></label>'
       + '</div>'
       + '<button class="btn btn-sm" id="product-scan-btn" type="button" style="margin-top:14px"><i class="bi bi-qr-code-scan"></i> Scan Barcode</button>'
-      + '<label class="field" style="margin-top:10px">Camera<select id="product-camera"><option value="">Default camera</option></select></label>'
+      + '<label class="field" style="margin-top:10px">Camera <span class="hint">(switch if preview freezes)</span><select id="product-camera"><option value="">Default camera</option></select></label>'
       + '<div id="product-scanner" style="width:100%;margin-top:10px"></div>';
   }
 

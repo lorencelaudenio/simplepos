@@ -186,12 +186,19 @@
   function waitForVideo(hostId, milliseconds) {
     return new Promise(function (resolve) {
       const started = Date.now();
+      let initialTime = null;
       function check() {
         const host = document.getElementById(hostId);
         const video = host ? host.querySelector('video') : null;
         if (video && video.readyState >= 2 && video.videoWidth > 0) {
-          resolve(true);
-          return;
+          if (video.paused) video.play().catch(function () {});
+          if (initialTime === null) {
+            initialTime = video.currentTime;
+          } else if (video.currentTime > initialTime + 0.01) {
+            // The frame counter is advancing, so the preview is genuinely live.
+            resolve(true);
+            return;
+          }
         }
         if (Date.now() - started >= milliseconds) {
           resolve(false);
@@ -211,15 +218,22 @@
     select.innerHTML = '';
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
-    defaultOption.textContent = isMobileDevice() ? 'Mobile back camera' : 'Default camera';
+    defaultOption.textContent = isMobileDevice() ? 'Auto (back preferred)' : 'Default camera';
     select.appendChild(defaultOption);
+    [['front', 'Front camera'], ['back', 'Back camera']].forEach(function (choice) {
+      const option = document.createElement('option');
+      option.value = choice[0];
+      option.textContent = choice[1];
+      select.appendChild(option);
+    });
     cameras.forEach(function (camera, index) {
       const option = document.createElement('option');
       option.value = camera.id;
       option.textContent = camera.label || ('Camera ' + (index + 1));
       select.appendChild(option);
     });
-    if (current && cameras.some(function (camera) { return camera.id === current; })) {
+    if (current === 'front' || current === 'back'
+      || cameras.some(function (camera) { return camera.id === current; })) {
       select.value = current;
     }
   }
@@ -267,7 +281,15 @@
 
     const mobile = isMobileDevice();
 
-    if (cameraId) {
+    if (cameraId === 'front') {
+      if (await start({ facingMode: 'user' })) return;
+    } else if (cameraId === 'back') {
+      if (await start({ facingMode: 'environment' })) return;
+      if (await start({ facingMode: 'user' })) {
+        toast('Back camera did not start; switched to front camera.', '');
+        return;
+      }
+    } else if (cameraId) {
       if (await start({ deviceId: { exact: cameraId } })) return;
     } else if (mobile) {
       // Prefer the back camera, but never leave the scanner stuck if that camera hangs.

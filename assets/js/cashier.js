@@ -221,7 +221,7 @@
   }
 
   function scanModal() {
-    const body = '<p class="muted small">Allow camera access when prompted, then point your desktop webcam or phone camera at a barcode.</p>'
+    const body = '<p class="muted small">Allow camera access when prompted, then point your desktop webcam or phone camera at a barcode. If the preview freezes, choose another camera above.</p>'
       + '<label class="field">Camera<select id="cashier-camera"><option value="">Default camera</option></select></label>'
       + '<div id="cashier-scanner" style="width:100%;min-height:220px;margin-top:10px"></div>'
       + '<label class="field" style="margin-top:14px">Or enter barcode manually'
