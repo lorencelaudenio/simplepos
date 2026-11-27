@@ -7,12 +7,13 @@ $action = $_GET['action'] ?? '';
 
 api_route(function () use ($action) {
     require_admin();
+
     $keys = [
         'store_name', 'store_address', 'receipt_footer',
         'smtp_host', 'smtp_port', 'smtp_secure', 'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_from_name',
     ];
 
-    if ($action === 'get') {
+    $publicSettings = static function () use ($keys): array {
         $settings = [];
         foreach ($keys as $key) {
             $settings[$key] = get_setting($key);
@@ -20,7 +21,11 @@ api_route(function () use ($action) {
         // Never expose the stored SMTP password to the browser.
         $settings['smtp_pass_configured'] = $settings['smtp_pass'] !== '';
         $settings['smtp_pass'] = '';
-        json_ok(['settings' => $settings]);
+        return $settings;
+    };
+
+    if ($action === 'get') {
+        json_ok(['settings' => $publicSettings()]);
     }
 
     if ($action === 'save') {
@@ -29,7 +34,8 @@ api_route(function () use ($action) {
         foreach ($keys as $key) {
             $values[$key] = sval($body, $key);
         }
-        if ($values['store_name'] === '' || strlen($values['store_name']) > 150) {
+
+        if ($values['store_name'] === '' || mb_strlen($values['store_name']) > 150) {
             fail('Store name is required (150 characters maximum).');
         }
         if (!ctype_digit($values['smtp_port']) || (int)$values['smtp_port'] < 1 || (int)$values['smtp_port'] > 65535) {
@@ -38,25 +44,36 @@ api_route(function () use ($action) {
         if (!in_array($values['smtp_secure'], ['tls', 'ssl', 'none'], true)) {
             fail('Invalid SMTP security option.');
         }
-        if (strlen($values['smtp_host']) > 200 || strlen($values['smtp_user']) > 200 || strlen($values['smtp_from']) > 200) {
+        if (mb_strlen($values['smtp_host']) > 200 || mb_strlen($values['smtp_user']) > 200 || mb_strlen($values['smtp_from']) > 200) {
             fail('SMTP fields are too long.');
         }
+
         // A blank password field means "keep the current password".
         if ($values['smtp_pass'] === '') {
             unset($values['smtp_pass']);
         }
+
         $pdo = db();
+        $stmt = $pdo->prepare(
+            'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+             ON DUPLICATE KEY UPDATE setting_value = ?'
+        );
         $pdo->beginTransaction();
         try {
             foreach ($values as $key => $value) {
-                set_setting($key, $value);
+                $stmt->execute([$key, $value, $value]);
             }
             $pdo->commit();
         } catch (Throwable $ex) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            clear_setting_cache();
             throw $ex;
         }
-        json_ok([], 'Settings saved successfully.');
+
+        clear_setting_cache();
+        json_ok(['settings' => $publicSettings()], 'Settings saved successfully.');
     }
 
     fail('Unknown settings action.', 404);

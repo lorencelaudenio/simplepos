@@ -150,7 +150,10 @@ function money_val($value): string
 /** Reads a setting from the database (cached per request). */
 function get_setting(string $key, string $default = ''): string
 {
-    static $cache = [];
+    if (!isset($GLOBALS['pos_setting_cache']) || !is_array($GLOBALS['pos_setting_cache'])) {
+        $GLOBALS['pos_setting_cache'] = [];
+    }
+    $cache =& $GLOBALS['pos_setting_cache'];
     if (array_key_exists($key, $cache)) {
         return $cache[$key];
     }
@@ -165,6 +168,11 @@ function get_setting(string $key, string $default = ''): string
     return $cache[$key];
 }
 
+function clear_setting_cache(): void
+{
+    $GLOBALS['pos_setting_cache'] = [];
+}
+
 function set_setting(string $key, string $value): void
 {
     $stmt = db()->prepare(
@@ -172,6 +180,7 @@ function set_setting(string $key, string $value): void
          ON DUPLICATE KEY UPDATE setting_value = ?'
     );
     $stmt->execute([$key, $value, $value]);
+    unset($GLOBALS['pos_setting_cache'][$key]);
 }
 
 function require_admin(): void

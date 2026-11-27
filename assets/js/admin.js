@@ -156,8 +156,16 @@
     });
     try {
       const data = await window.POS.api('api/settings.php?action=save', { method: 'POST', body: payload });
-      window.POS.toast(data.message, 'success');
-      loadSettings();
+      const saved = data.settings || {};
+      Object.keys(saved).forEach(function (key) {
+        const input = $('setting-' + key);
+        if (input) input.value = saved[key] == null ? '' : saved[key];
+      });
+      const pass = $('setting-smtp_pass');
+      if (pass) pass.placeholder = saved.smtp_pass_configured
+        ? 'Password saved — leave blank to keep'
+        : 'Leave blank to keep current';
+      window.POS.toast(data.message || 'Settings saved.', 'success');
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
 

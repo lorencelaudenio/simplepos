@@ -12,7 +12,7 @@ $heroStore = get_setting('store_name', 'Simple Online POS');
   <meta name="description" content="Simple Online POS - cashier, inventory, sales history, and secure backups in one lightweight web app.">
   <title><?= e($heroStore) ?> - Point of Sale</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="assets/css/app.css?v=1">
+  <link rel="stylesheet" href="assets/css/app.css?v=2">
 </head>
 <body class="hero-page">
   <header class="hero-nav">
