@@ -8,7 +8,7 @@ A lightweight, responsive point-of-sale system built with native PHP 8.1+, MySQL
 - MySQL 5.7+ or MariaDB 10.4+
 - Apache (`.htaccess` files are included) or Nginx with equivalent deny rules
 - Internet access for CDN assets: Bootstrap Icons, Chart.js, and html5-qrcode (browser camera barcode scanner)
-- HTTPS (or localhost) for browser camera barcode scanning on desktop or mobile, as required by browser permissions
+- HTTPS (or localhost) for browser camera barcode scanning on desktop or mobile. Browsers block the camera on plain HTTP, so iPhone will deny access even if Safari settings allow it.
 - On iPhone, camera access must also be allowed in **Safari → Settings → Website Settings → Camera** for this site
 
 ## Installation

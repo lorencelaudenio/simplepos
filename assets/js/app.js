@@ -154,6 +154,14 @@
       || (navigator.maxTouchPoints > 1 && window.matchMedia('(max-width: 900px)').matches);
   }
 
+  function browserAllowsCamera() {
+    const host = window.location.hostname;
+    return window.isSecureContext === true
+      || window.location.protocol === 'https:'
+      || host === 'localhost'
+      || host === '127.0.0.1';
+  }
+
   function preferredCamera(cameras) {
     const back = cameras.find(function (camera) {
       return /back|rear|environment|world|main/i.test(camera.label || '');
@@ -184,6 +192,10 @@
   }
 
   async function openCameraScanner(hostId, onResult, cameraId, onStarted) {
+    if (!browserAllowsCamera()) {
+      toast('Camera access requires HTTPS. Use the HTTPS version of this site or enter the barcode manually.', 'error');
+      return;
+    }
     if (typeof window.Html5Qrcode === 'undefined') {
       toast('Barcode scanner library is unavailable. Check your internet connection.', 'error');
       return;
