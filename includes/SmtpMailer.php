@@ -125,7 +125,7 @@ class SmtpMailer
             $this->command('DATA', 354, 'DATA');
 
             $this->lastStep = 'message data';
-            $this->writeAll($this->buildMessage());
+            $this->writeAll($this->prepareMessage($this->buildMessage()));
             $this->expect(250, $this->readResponse(), 'message data');
 
             // Some servers close immediately after accepting the message.
@@ -202,6 +202,15 @@ class SmtpMailer
             }
         }
         return $mechanisms;
+    }
+
+    /** Normalize line endings, escape leading dots, and close the DATA block. */
+    private function prepareMessage(string $message): string
+    {
+        $message = str_replace(["\r\n", "\r"], "\n", $message);
+        $message = preg_replace('/^\./m', '..', $message) ?? $message;
+        $message = rtrim($message, "\n") . "\n.\n";
+        return str_replace("\n", "\r\n", $message);
     }
 
     private function buildMessage(): string
