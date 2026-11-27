@@ -69,7 +69,7 @@ api_route(function () use ($action) {
                 $pdo->rollBack();
             }
             clear_setting_cache();
-            throw $ex;
+            fail('Settings could not be saved: ' . $ex->getMessage(), 500);
         }
 
         clear_setting_cache();
@@ -85,11 +85,17 @@ api_route(function () use ($action) {
             fail('SMTP is not configured. Save your SMTP settings first.');
         }
         $store = get_setting('store_name', 'Simple Online POS');
-        send_pos_email(
-            $email,
-            $store . ' email test',
-            "This is a test email from " . $store . ".\n\nIf you received this, your SMTP settings are working."
-        );
+        try {
+            send_pos_email(
+                $email,
+                $store . ' email test',
+                "This is a test email from " . $store . ".\n\nIf you received this, your SMTP settings are working."
+            );
+        } catch (ApiException $ex) {
+            throw $ex;
+        } catch (Throwable $ex) {
+            fail('Email could not be sent: ' . $ex->getMessage(), 502);
+        }
         json_ok([], 'Test email sent successfully.');
     }
 

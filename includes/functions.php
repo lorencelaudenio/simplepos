@@ -71,8 +71,13 @@ function api_route(callable $handler): void
     } catch (ApiException $ex) {
         json_out(['ok' => false, 'error' => $ex->getMessage()], $ex->httpStatus);
     } catch (Throwable $ex) {
-        error_log('POS API error: ' . $ex->getMessage() . ' in ' . $ex->getFile() . ':' . $ex->getLine());
-        json_out(['ok' => false, 'error' => 'Unable to complete the request. Please try again.'], 500);
+        $ref = strtoupper(bin2hex(random_bytes(3)));
+        error_log('POS API error [' . $ref . ']: ' . $ex->getMessage()
+            . ' in ' . $ex->getFile() . ':' . $ex->getLine());
+        json_out([
+            'ok' => false,
+            'error' => 'Unable to complete the request. Please try again. (Ref: ' . $ref . ')'
+        ], 500);
     }
 }
 
