@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/invites.php';
+require_once __DIR__ . '/includes/activation.php';
 
 if (current_user()) {
     header('Location: index.php');
@@ -11,7 +11,8 @@ if (current_user()) {
 }
 
 $error = '';
-$values = ['username' => '', 'full_name' => '', 'invite_code' => ''];
+$success = false;
+$values = ['username' => '', 'full_name' => '', 'email' => ''];
 
 $dbReady = true;
 try {
@@ -25,33 +26,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Invalid security token. Please refresh the page.';
     } elseif (!$dbReady) {
         $error = 'The database is not configured. Please contact the website administrator.';
+    } elseif (!smtp_configured()) {
+        $error = 'Email activation is not configured yet. Ask the administrator to set up SMTP.';
     } else {
         $values['username'] = trim((string)($_POST['username'] ?? ''));
         $values['full_name'] = trim((string)($_POST['full_name'] ?? ''));
-        $values['invite_code'] = invite_normalize_code((string)($_POST['invite_code'] ?? ''));
+        $values['email'] = trim((string)($_POST['email'] ?? ''));
         $password = (string)($_POST['password'] ?? '');
         $confirm = (string)($_POST['confirm_password'] ?? '');
 
-        if (!preg_match('/^[A-Za-z0-9_.-]{3,100}$/', $values['username'])) {
-            $error = 'Username must be 3-100 characters using letters, numbers, dot, dash, or underscore.';
-        } elseif ($values['full_name'] === '' || mb_strlen($values['full_name']) > 150) {
-            $error = 'Full name is required (150 characters maximum).';
-        } elseif (strlen($password) < 8) {
-            $error = 'Password must be at least 8 characters.';
-        } elseif ($password !== $confirm) {
+        if ($password !== $confirm) {
             $error = 'Passwords do not match.';
-        } elseif (!invite_valid_code($values['invite_code'])) {
-            $error = 'Enter the invite code given to you by your administrator.';
         } else {
             try {
-                invite_register(db(), $values['invite_code'], $values['username'], $password, $values['full_name']);
-                header('Location: login.php?signedup=1');
-                exit;
+                $activation = activation_register(
+                    db(),
+                    $values['username'],
+                    $values['full_name'],
+                    $values['email'],
+                    $password
+                );
+                try {
+                    activation_send_email($activation);
+                } catch (Throwable $mailError) {
+                    activation_cleanup(db(), (int)$activation['user_id'], (string)$activation['token']);
+                    error_log('POS activation email error: ' . $mailError->getMessage());
+                    throw new RuntimeException('We could not send the activation email. Please check the SMTP settings or try again later.');
+                }
+                $success = true;
             } catch (ApiException $ex) {
                 $error = $ex->getMessage();
             } catch (Throwable $ex) {
                 error_log('POS signup error: ' . $ex->getMessage());
-                $error = 'Unable to create the account right now. Please try again.';
+                $error = $ex->getMessage() === 'We could not send the activation email. Please check the SMTP settings or try again later.'
+                    ? $ex->getMessage()
+                    : 'Unable to create the account right now. Please try again.';
             }
         }
     }
@@ -70,21 +79,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <main class="card login-card">
     <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></div>
     <h1>Create a client account</h1>
-    <p>Signup requires an invite code from your website administrator.</p>
+    <p>Register below, then activate your account using the link we email to you.</p>
     <?php if ($error !== ''): ?><div class="login-error"><?= e($error) ?></div><?php endif; ?>
     <?php if (!$dbReady): ?>
       <div class="notice"><i class="bi bi-info-circle"></i> Database not configured. Please contact your administrator.</div>
+    <?php elseif (!smtp_configured()): ?>
+      <div class="notice"><i class="bi bi-info-circle"></i> SMTP is not configured. Self-signup is temporarily unavailable.</div>
     <?php endif; ?>
-    <form method="post" action="signup.php">
-      <?= csrf_input() ?>
-      <label class="field">Invite Code<input type="text" name="invite_code" value="<?= e($values['invite_code']) ?>" placeholder="ABC12345" maxlength="20" required autofocus style="text-transform:uppercase"></label>
-      <label class="field" style="margin-top:14px">Username<input type="text" name="username" value="<?= e($values['username']) ?>" autocomplete="username" maxlength="100" required></label>
-      <label class="field" style="margin-top:14px">Full Name<input type="text" name="full_name" value="<?= e($values['full_name']) ?>" autocomplete="name" maxlength="150" required></label>
-      <label class="field" style="margin-top:14px">Password<input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
-      <label class="field" style="margin-top:14px">Confirm Password<input type="password" name="confirm_password" autocomplete="new-password" minlength="8" required></label>
-      <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-person-plus"></i> Create Account</button>
-    </form>
-    <p class="auth-link" style="margin-top:18px;margin-bottom:0">Already have an account? <a href="login.php">Sign in</a></p>
+    <?php if ($success): ?>
+      <div class="login-success"><i class="bi bi-envelope-check-fill"></i> Check <strong><?= e($values['email']) ?></strong> for your activation link. The link expires in 24 hours.</div>
+      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Email not arriving? <a href="resend.php">Resend activation</a></p>
+    <?php else: ?>
+      <form method="post" action="signup.php">
+        <?= csrf_input() ?>
+        <label class="field">Full Name<input type="text" name="full_name" value="<?= e($values['full_name']) ?>" autocomplete="name" maxlength="150" required></label>
+        <label class="field" style="margin-top:14px">Username<input type="text" name="username" value="<?= e($values['username']) ?>" autocomplete="username" maxlength="100" required></label>
+        <label class="field" style="margin-top:14px">Email Address<input type="email" name="email" value="<?= e($values['email']) ?>" autocomplete="email" maxlength="150" required></label>
+        <label class="field" style="margin-top:14px">Password<input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+        <label class="field" style="margin-top:14px">Confirm Password<input type="password" name="confirm_password" autocomplete="new-password" minlength="8" required></label>
+        <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-person-plus"></i> Create Account</button>
+      </form>
+      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Already have an account? <a href="login.php">Sign in</a></p>
+    <?php endif; ?>
   </main>
 </body>
 </html>

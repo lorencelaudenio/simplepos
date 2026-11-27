@@ -33,7 +33,7 @@ $heroStore = get_setting('store_name', 'Simple Online POS');
           <p class="hero-lead">Sell faster, track every product, review daily sales, and keep a safe backup of your business — all in one place.</p>
           <div class="hero-actions">
             <a class="btn btn-primary btn-lg" href="login.php"><i class="bi bi-cash-coin"></i> Open Cashier</a>
-            <a class="btn btn-lg" href="signup.php"><i class="bi bi-ticket-perforated"></i> Have an invite code?</a>
+            <a class="btn btn-lg" href="signup.php"><i class="bi bi-person-plus"></i> New here? Sign up</a>
           </div>
           <div class="hero-points">
             <span><i class="bi bi-check-circle-fill"></i> No installs for cashiers</span>

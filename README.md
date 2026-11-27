@@ -26,6 +26,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 ## Features
 
 - **Public hero page:** the root URL (`index.php`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages.
+- **Open signup with email activation:** clients register themselves, then activate a 24-hour link sent through SMTP; accounts stay inactive until confirmed.
 - **Multi-user, one app:** Website Administrators see an Admin Dashboard (overview, users, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. API endpoints enforce these roles server-side.
 - **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), mobile camera scanner, cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts.
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
@@ -33,16 +34,17 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 - **Backup & Restore:** timestamped SQL download, SMTP email backup (PHPMailer when installed, built-in SMTP client otherwise), validated `.sql` upload, confirmation dialog, automatic safety backup before restore, admin-only access.
 - **Security:** PHP sessions, `password_hash()`/`password_verify()`, PDO prepared statements, CSRF tokens on all writes, server-side validation, escaped output, file upload checks, role enforcement, and web access denied to `config/`, `includes/`, `uploads/`, and `vendor/`.
 
-## Client signup
+## Client signup and email activation
 
-Public registration is invite-only:
+Registration is open, but new accounts cannot use the POS until their email is activated:
 
-1. Log in as Website Admin and open **Users → Signup Invite Codes**.
-2. Click **Generate Code**, choose an expiry and usage limit, then copy the code.
-3. Share the code privately with cashiers.
-4. The cashier opens `signup.php` from the login page, enters the code, and creates their own **Client** account.
+1. Configure SMTP under **Website Settings** (or using `smtp_host`, `smtp_port`, `smtp_secure`, `smtp_user`, `smtp_pass`, `smtp_from`).
+2. A cashier opens `signup.php` from the login/hero page and submits name, username, email, and password.
+3. The account is created as an inactive **Client** and a 24-hour activation link is emailed to them.
+4. The cashier opens the link in `activate.php`; the account becomes active and they can sign in.
+5. If the email is lost, they can request a fresh link from `resend.php` (one request per minute).
 
-Invite codes never create administrators. They can expire, reach a usage limit, or be revoked at any time; revoking a code does not disable accounts already created with it.
+Public signups always create Client accounts, never Website Administrators. If the activation email cannot be sent, the pending account is removed automatically. Admins can still enable/disable or delete accounts from **Users**.
 
 ## Optional: PHPMailer
 
@@ -54,8 +56,8 @@ Backups contain `users`, `products`, `sales`, `sale_items`, `stock_movements`, a
 
 ## Before going live - verification checklist
 
-1. Log in as the administrator, open **Users**, and generate an invite code.
-2. Open `signup.php`, redeem the code, and confirm the new Client can log in and only sees POS tabs.
+1. Configure SMTP, open `signup.php`, register a Client, and confirm the activation email arrives.
+2. Click the activation link, sign in as the new Client, and confirm only POS tabs are visible.
 3. Add, edit, archive, restore, and delete products (with and without sales history).
 4. Add stock and confirm the movement history and low-stock alert update.
 5. Search by name and barcode; test a USB scanner and the mobile camera scanner.

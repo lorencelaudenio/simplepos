@@ -4,7 +4,6 @@
 
   const $ = function (id) { return document.getElementById(id); };
   let users = [];
-  let invites = [];
 
   function esc(value) { return window.POS.esc(value); }
   function money(value) { return window.POS.money(value); }
@@ -103,26 +102,6 @@
   function initUsers() {
     if (!$('users-list')) return;
     $('add-user-btn').addEventListener('click', function () { openUserModal(null); });
-    $('generate-invite-btn').addEventListener('click', openInviteModal);
-    $('invites-list').addEventListener('click', async function (event) {
-      const button = event.target.closest('button[data-action="revoke"]');
-      if (!button) return;
-      const code = button.dataset.code;
-      const ok = await window.POS.confirm(
-        'Revoke invite code?',
-        'Code "' + code + '" will stop working immediately. Existing accounts remain active.',
-        'Revoke code'
-      );
-      if (!ok) return;
-      try {
-        const data = await window.POS.api('api/admin.php?action=invite_revoke', {
-          method: 'POST',
-          body: { code: code }
-        });
-        await loadInvites();
-        window.POS.toast(data.message, 'success');
-      } catch (error) { window.POS.toast(error.message, 'error'); }
-    });
     $('users-list').addEventListener('click', async function (event) {
       const button = event.target.closest('button[data-action]');
       if (!button) return;
@@ -150,64 +129,7 @@
     });
   }
 
-  async function loadInvites() {
-    if (!$('invites-list')) return;
-    try {
-      const data = await window.POS.api('api/admin.php?action=invite_list');
-      invites = data.invites || [];
-      const body = $('invites-list');
-      if (!invites.length) {
-        body.innerHTML = '<tr><td colspan="6" class="center muted">No invite codes yet. Generate one to allow self-signup.</td></tr>';
-        return;
-      }
-      body.innerHTML = invites.map(function (invite) {
-        const status = invite.revoked ? 'Revoked' : invite.expired ? 'Expired'
-          : invite.exhausted ? 'Used up' : 'Active';
-        const statusClass = invite.usable ? 'badge-green' : 'badge-red';
-        const expires = invite.expires_at ? String(invite.expires_at).replace('T', ' ') : 'Never';
-        return '<tr><td><strong>' + esc(invite.code) + '</strong></td>'
-          + '<td>' + esc(String(invite.created_at || '').replace('T', ' ')) + '</td>'
-          + '<td>' + esc(expires) + '</td>'
-          + '<td>' + esc(invite.uses || 0) + ' / ' + esc(invite.max_uses || 0) + '</td>'
-          + '<td><span class="badge ' + statusClass + '">' + status + '</span></td>'
-          + '<td>' + (invite.revoked ? '<span class="muted">—</span>'
-            : '<button class="btn btn-sm btn-danger" data-action="revoke" data-code="' + esc(invite.code) + '" type="button"><i class="bi bi-x-circle"></i> Revoke</button>') + '</td></tr>';
-      }).join('');
-    } catch (error) { window.POS.toast(error.message, 'error'); }
-  }
-
-  function openInviteModal() {
-    const body = '<div class="form-grid">'
-      + '<label class="field">Expires After<select id="i-days">'
-      + '<option value="1">1 day</option><option value="7" selected>7 days</option>'
-      + '<option value="30">30 days</option><option value="0">Never</option>'
-      + '</select></label>'
-      + '<label class="field">Maximum Uses<select id="i-uses">'
-      + '<option value="1">1 signup</option><option value="5" selected>5 signups</option>'
-      + '<option value="25">25 signups</option><option value="100">100 signups</option>'
-      + '</select></label>'
-      + '</div><p class="muted small" style="margin-top:12px">The code will only create Client accounts. Copy it after creation and share it privately.</p>';
-    const footer = '<button class="btn btn-primary" id="save-invite" type="button"><i class="bi bi-ticket-perforated"></i> Generate</button>'
-      + '<button class="btn btn-ghost" id="cancel-invite" type="button">Cancel</button>';
-    window.POS.openModal('Generate Invite Code', body, footer);
-    $('cancel-invite').addEventListener('click', window.POS.closeModal);
-    $('save-invite').addEventListener('click', async function () {
-      try {
-        const data = await window.POS.api('api/admin.php?action=invite_create', {
-          method: 'POST',
-          body: { days: Number($('i-days').value), max_uses: Number($('i-uses').value) }
-        });
-        window.POS.closeModal();
-        await loadInvites();
-        window.POS.toast('Invite code ' + data.invite.code + ' created.', 'success');
-      } catch (error) { window.POS.toast(error.message, 'error'); }
-    });
-  }
-
-  window.Users = {
-    init: initUsers,
-    onShow: function () { loadUsers(); loadInvites(); }
-  };
+  window.Users = { init: initUsers, onShow: loadUsers };
 
   /* ---------- Website settings ---------- */
   async function loadSettings() {

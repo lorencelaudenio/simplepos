@@ -17,6 +17,12 @@ if (!function_exists('mb_substr')) {
     }
 }
 
+// PHPMailer is optional; load it when installed so every entry point can send mail.
+$vendorAutoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (is_file($vendorAutoload)) {
+    require_once $vendorAutoload;
+}
+
 class ApiException extends RuntimeException
 {
     public int $httpStatus;
@@ -291,54 +297,84 @@ function sales_where(array $range): array
     ];
 }
 
-/** Sends the generated SQL backup by email; uses PHPMailer when installed, native SMTP otherwise. */
-function send_backup_email(string $to, string $subject, string $body, string $filename, string $sql): array
+function smtp_configured(): bool
 {
+    return get_setting('smtp_host') !== '';
+}
+
+/** Sends email with PHPMailer when installed, native SMTP otherwise. */
+function send_pos_email(
+    string $to,
+    string $subject,
+    string $body,
+    ?string $filename = null,
+    ?string $attachment = null
+): array {
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
         fail('Please enter a valid email address.');
     }
+    if (!smtp_configured()) {
+        fail('Email delivery is not configured. Ask the administrator to set up SMTP.', 500);
+    }
+
+    $host = get_setting('smtp_host');
+    $port = (int)(get_setting('smtp_port', '587') ?: 587);
+    $secure = strtolower(get_setting('smtp_secure', 'tls'));
+    $username = get_setting('smtp_user');
+    $password = get_setting('smtp_pass');
+    $from = get_setting('smtp_from') ?: $username ?: 'pos@localhost';
+    $from = filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'pos@localhost';
+    $fromName = get_setting('smtp_from_name', 'Simple Online POS');
+
     if (class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
         $mail = new PHPMailer\PHPMailer\PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host = get_setting('smtp_host');
-        $mail->Port = (int)(get_setting('smtp_port', '587') ?: 587);
-        $secure = strtolower(get_setting('smtp_secure', 'tls'));
+        $mail->Host = $host;
+        $mail->Port = $port;
         $mail->SMTPSecure = match ($secure) {
             'ssl' => PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS,
             'tls' => PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS,
             default => false,
         };
-        $mail->SMTPAuth = get_setting('smtp_user') !== '';
+        $mail->SMTPAuth = $username !== '';
         if ($mail->SMTPAuth) {
-            $mail->Username = get_setting('smtp_user');
-            $mail->Password = get_setting('smtp_pass');
+            $mail->Username = $username;
+            $mail->Password = $password;
         }
-        $from = get_setting('smtp_from') ?: get_setting('smtp_user') ?: 'pos@localhost';
-        $mail->setFrom(filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'pos@localhost', get_setting('smtp_from_name', 'POS Backup Service'));
+        $mail->setFrom($from, $fromName);
         $mail->addAddress($to);
         $mail->Subject = $subject;
         $mail->Body = $body;
-        $mail->addStringAttachment($sql, $filename, 'base64', 'application/sql');
+        if ($filename !== null && $attachment !== null) {
+            $mail->addStringAttachment($attachment, $filename, 'base64', 'application/sql');
+        }
         $mail->send();
         return ['method' => 'phpmailer'];
     }
 
     require_once __DIR__ . '/SmtpMailer.php';
     $mailer = new SmtpMailer();
-    $mailer->host = get_setting('smtp_host');
-    $mailer->port = (int)(get_setting('smtp_port', '587') ?: 587);
-    $mailer->secure = strtolower(get_setting('smtp_secure', 'tls'));
-    $mailer->username = get_setting('smtp_user');
-    $mailer->password = get_setting('smtp_pass');
-    $from = get_setting('smtp_from') ?: get_setting('smtp_user') ?: 'pos@localhost';
-    $mailer->from = filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'pos@localhost';
-    $mailer->fromName = get_setting('smtp_from_name', 'POS Backup Service');
+    $mailer->host = $host;
+    $mailer->port = $port;
+    $mailer->secure = $secure;
+    $mailer->username = $username;
+    $mailer->password = $password;
+    $mailer->from = $from;
+    $mailer->fromName = $fromName;
     $mailer->to = $to;
     $mailer->subject = $subject;
     $mailer->body = $body;
-    $mailer->addAttachment($filename, $sql);
+    if ($filename !== null && $attachment !== null) {
+        $mailer->addAttachment($filename, $attachment);
+    }
     $mailer->send();
     return ['method' => 'builtin-smtp'];
+}
+
+/** Sends the generated SQL backup by email. */
+function send_backup_email(string $to, string $subject, string $body, string $filename, string $sql): array
+{
+    return send_pos_email($to, $subject, $body, $filename, $sql);
 }
 
 function upload_dir(string $name): string

@@ -1,0 +1,55 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/activation.php';
+
+if (current_user()) {
+    header('Location: index.php');
+    exit;
+}
+
+$token = trim((string)($_GET['token'] ?? ''));
+$activated = false;
+$error = '';
+
+if ($token === '') {
+    $error = 'No activation link was provided.';
+} else {
+    try {
+        activation_activate(db(), $token);
+        $activated = true;
+    } catch (ApiException $ex) {
+        $error = $ex->getMessage();
+    } catch (Throwable $ex) {
+        error_log('POS activation error: ' . $ex->getMessage());
+        $error = 'Unable to activate the account right now. Please try again.';
+    }
+}
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Activate account - POS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/app.css?v=1">
+</head>
+<body class="login-page">
+  <main class="card login-card">
+    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></div>
+    <h1>Account activation</h1>
+    <p>Confirm your email to finish setting up your client account.</p>
+    <?php if ($activated): ?>
+      <div class="login-success"><i class="bi bi-check-circle-fill"></i> Your account is active. You can sign in now.</div>
+      <a class="btn btn-primary btn-block" href="login.php?activated=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
+    <?php else: ?>
+      <div class="login-error"><?= e($error) ?></div>
+      <a class="btn btn-block" href="resend.php"><i class="bi bi-envelope-arrow-up"></i> Request a new activation link</a>
+      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Back to <a href="login.php">sign in</a></p>
+    <?php endif; ?>
+  </main>
+</body>
+</html>

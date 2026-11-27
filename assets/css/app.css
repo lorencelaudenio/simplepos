@@ -267,6 +267,8 @@ tbody tr:hover { background: #fafafa; }
 .login-card p { color: var(--muted); margin: 0 0 22px; font-size: 14px; }
 .login-card .btn { min-height: 46px; margin-top: 16px; }
 .login-error { background: var(--danger-soft); color: #991b1b; border-radius: 9px; padding: 10px 12px; margin-bottom: 14px; font-size: 14px; }
+.login-success { background: var(--green-soft); color: var(--green-dark); border-radius: 9px; padding: 12px; margin-bottom: 14px; font-size: 14px; }
+.login-success i { margin-right: 6px; }
 .auth-link { font-size: 14px; text-align: center; }
 .auth-link a { color: var(--green-dark); font-weight: 600; text-decoration: none; }
 .auth-link a:hover { text-decoration: underline; }

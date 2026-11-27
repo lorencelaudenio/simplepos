@@ -18,7 +18,10 @@ if (isset($_GET['logged_out'])) {
     $notice = 'You have been logged out.';
 }
 if (isset($_GET['signedup'])) {
-    $notice = 'Account created. You can sign in now.';
+    $notice = 'Account created. Check your email for the activation link.';
+}
+if (isset($_GET['activated'])) {
+    $notice = 'Your account is active. You can sign in now.';
 }
 
 $dbReady = true;
@@ -79,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label class="field" style="margin-top:14px">Password<input type="password" name="password" autocomplete="current-password" required></label>
       <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign In</button>
     </form>
-    <p class="auth-link" style="margin-top:18px;margin-bottom:0">Have an invite code? <a href="signup.php">Create a client account</a></p>
+    <p class="auth-link" style="margin-top:18px;margin-bottom:0">New here? <a href="signup.php">Create a client account</a><br><span style="display:inline-block;margin-top:8px">Need to activate? <a href="resend.php">Resend activation email</a></span></p>
   </main>
 </body>
 </html>
