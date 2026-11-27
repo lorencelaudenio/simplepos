@@ -236,10 +236,10 @@
       window.POS.closeModal();
     }
 
-    window.POS.populateCameraSelect('cashier-camera');
-    window.POS.openCameraScanner('cashier-scanner', addScanned);
+    function fillCameras() { window.POS.populateCameraSelect('cashier-camera'); }
+    window.POS.openCameraScanner('cashier-scanner', addScanned, '', fillCameras);
     $('cashier-camera').addEventListener('change', function () {
-      window.POS.openCameraScanner('cashier-scanner', addScanned, this.value);
+      window.POS.openCameraScanner('cashier-scanner', addScanned, this.value, fillCameras);
     });
     $('use-manual-barcode').addEventListener('click', function () {
       const code = $('manual-barcode').value.trim();

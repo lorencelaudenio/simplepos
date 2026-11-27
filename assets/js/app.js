@@ -166,6 +166,7 @@
     const select = document.getElementById(selectId);
     if (!select) return;
     const cameras = await listCameras();
+    const current = select.value;
     select.innerHTML = '';
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
@@ -177,9 +178,12 @@
       option.textContent = camera.label || ('Camera ' + (index + 1));
       select.appendChild(option);
     });
+    if (current && cameras.some(function (camera) { return camera.id === current; })) {
+      select.value = current;
+    }
   }
 
-  async function openCameraScanner(hostId, onResult, cameraId) {
+  async function openCameraScanner(hostId, onResult, cameraId, onStarted) {
     if (typeof window.Html5Qrcode === 'undefined') {
       toast('Barcode scanner library is unavailable. Check your internet connection.', 'error');
       return;
@@ -201,6 +205,7 @@
           },
           function () { /* ignore frames without a barcode */ }
         );
+        if (typeof onStarted === 'function') onStarted();
         return true;
       } catch (err) {
         lastError = err;
@@ -231,10 +236,11 @@
     }
 
     if (qrScanner) return;
-    toast(
-      'Unable to start the camera: ' + (lastError && lastError.message ? lastError.message : 'permission denied'),
-      'error'
-    );
+    const reason = lastError && lastError.message ? lastError.message : 'permission denied';
+    const hint = /denied|notallowed|permission/i.test(reason)
+      ? ' On iPhone, use HTTPS and allow Camera in Safari Settings → Website Settings for this site, then reload.'
+      : '';
+    toast('Unable to start the camera: ' + reason + hint, 'error');
   }
 
   function closeCameraScanner() {

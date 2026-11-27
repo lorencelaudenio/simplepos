@@ -96,7 +96,8 @@
         + '<button class="btn btn-ghost" id="cancel-product" type="button">Cancel</button>';
       window.POS.openModal(product ? 'Edit Product' : 'Add Product', body, footer);
       window.POS.onModalClose = function () { window.POS.closeCameraScanner(); };
-      window.POS.populateCameraSelect('product-camera');
+
+      function fillCameras() { window.POS.populateCameraSelect('product-camera'); }
 
       function scanResult(code) {
         $('f-barcode').value = code;
@@ -108,11 +109,11 @@
       $('product-scan-btn').addEventListener('click', function () {
         const host = $('product-scanner');
         if (host.innerHTML.trim() !== '') { window.POS.closeCameraScanner(); host.innerHTML = ''; return; }
-        window.POS.openCameraScanner('product-scanner', scanResult, $('product-camera').value);
+        window.POS.openCameraScanner('product-scanner', scanResult, $('product-camera').value, fillCameras);
       });
       $('product-camera').addEventListener('change', function () {
         if ($('product-scanner').innerHTML.trim() === '') return;
-        window.POS.openCameraScanner('product-scanner', scanResult, this.value);
+        window.POS.openCameraScanner('product-scanner', scanResult, this.value, fillCameras);
       });
       $('cancel-product').addEventListener('click', window.POS.closeModal);
       $('save-product').addEventListener('click', async function () {
