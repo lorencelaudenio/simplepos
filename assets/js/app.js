@@ -5,6 +5,7 @@
   const config = window.POS_CONFIG || { csrfToken: '', isAdmin: false, storeName: 'My Store' };
   let loadingDepth = 0;
   let qrScanner = null;
+  let scannerGeneration = 0;
   let confirmResolver = null;
 
   function esc(value) {
@@ -139,37 +140,95 @@
     }
   }
 
-  async function openCameraScanner(hostId, onResult) {
+  async function listCameras() {
+    if (typeof window.Html5Qrcode === 'undefined' || typeof window.Html5Qrcode.getCameras !== 'function') return [];
+    try {
+      const cameras = await window.Html5Qrcode.getCameras();
+      return Array.isArray(cameras) ? cameras : [];
+    } catch (err) { return []; }
+  }
+
+  async function populateCameraSelect(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    const cameras = await listCameras();
+    select.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Default camera';
+    select.appendChild(defaultOption);
+    cameras.forEach(function (camera, index) {
+      const option = document.createElement('option');
+      option.value = camera.id;
+      option.textContent = camera.label || ('Camera ' + (index + 1));
+      select.appendChild(option);
+    });
+  }
+
+  async function openCameraScanner(hostId, onResult, cameraId) {
     if (typeof window.Html5Qrcode === 'undefined') {
       toast('Barcode scanner library is unavailable. Check your internet connection.', 'error');
       return;
     }
-    closeCameraScanner();
-    qrScanner = new window.Html5Qrcode(hostId, { verbose: false });
-    try {
-      await qrScanner.start(
-        { facingMode: 'environment' },
-        { fps: 12, qrbox: { width: 260, height: 160 } },
-        function (decodedText) {
-          closeCameraScanner();
-          onResult(String(decodedText).trim());
-        },
-        function () { /* ignore frames without a barcode */ }
-      );
-    } catch (err) {
+
+    let lastError = null;
+
+    async function start(source) {
       closeCameraScanner();
-      toast('Unable to start the camera: ' + (err && err.message ? err.message : 'permission denied'), 'error');
+      const scanner = new window.Html5Qrcode(hostId, { verbose: false });
+      qrScanner = scanner;
+      try {
+        await scanner.start(
+          source,
+          { fps: 12, qrbox: { width: 260, height: 160 } },
+          function (decodedText) {
+            closeCameraScanner();
+            onResult(String(decodedText).trim());
+          },
+          function () { /* ignore frames without a barcode */ }
+        );
+        return true;
+      } catch (err) {
+        lastError = err;
+        closeCameraScanner();
+        return false;
+      }
     }
+
+    if (cameraId) {
+      await start({ deviceId: { exact: cameraId } });
+    } else {
+      const started = await start({ facingMode: 'environment' });
+      if (!started) {
+        // Desktops usually have only a front-facing webcam; try any camera available.
+        const cameras = await listCameras();
+        for (const camera of cameras) {
+          if (await start({ deviceId: { exact: camera.id } })) return;
+        }
+      } else {
+        return;
+      }
+    }
+
+    if (qrScanner) return;
+    toast(
+      'Unable to start the camera: ' + (lastError && lastError.message ? lastError.message : 'permission denied'),
+      'error'
+    );
   }
 
   function closeCameraScanner() {
     if (!qrScanner) return;
     const scanner = qrScanner;
+    const generation = ++scannerGeneration;
     qrScanner = null;
     try {
       const stopped = scanner.stop();
       if (stopped && typeof stopped.then === 'function') {
-        stopped.then(function () { return scanner.clear(); }).catch(function () {});
+        stopped.then(function () {
+          // A newer scanner may already be starting; do not clear its preview.
+          if (generation === scannerGeneration) scanner.clear();
+        }).catch(function () {});
       } else {
         scanner.clear();
       }
@@ -208,6 +267,8 @@
     confirm: confirmDialog,
     openCameraScanner: openCameraScanner,
     closeCameraScanner: closeCameraScanner,
+    listCameras: listCameras,
+    populateCameraSelect: populateCameraSelect,
     printReceipt: printReceipt,
     updateLowStock: updateLowStock,
     parseQuery: parseQuery,

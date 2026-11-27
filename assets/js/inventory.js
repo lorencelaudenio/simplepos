@@ -85,6 +85,7 @@
       + '<label class="field">Reorder Level *<input id="f-reorder" type="number" min="0" step="1" inputmode="numeric" value="' + esc(product.reorder_level != null ? product.reorder_level : 0) + '" required></label>'
       + '</div>'
       + '<button class="btn btn-sm" id="product-scan-btn" type="button" style="margin-top:14px"><i class="bi bi-qr-code-scan"></i> Scan Barcode</button>'
+      + '<label class="field" style="margin-top:10px">Camera<select id="product-camera"><option value="">Default camera</option></select></label>'
       + '<div id="product-scanner" style="width:100%;margin-top:10px"></div>';
   }
 
@@ -95,15 +96,23 @@
         + '<button class="btn btn-ghost" id="cancel-product" type="button">Cancel</button>';
       window.POS.openModal(product ? 'Edit Product' : 'Add Product', body, footer);
       window.POS.onModalClose = function () { window.POS.closeCameraScanner(); };
+      window.POS.populateCameraSelect('product-camera');
+
+      function scanResult(code) {
+        $('f-barcode').value = code;
+        window.POS.closeCameraScanner();
+        $('product-scanner').innerHTML = '';
+        window.POS.toast('Barcode captured: ' + code, 'success');
+      }
+
       $('product-scan-btn').addEventListener('click', function () {
         const host = $('product-scanner');
         if (host.innerHTML.trim() !== '') { window.POS.closeCameraScanner(); host.innerHTML = ''; return; }
-        window.POS.openCameraScanner('product-scanner', function (code) {
-          $('f-barcode').value = code;
-          window.POS.closeCameraScanner();
-          host.innerHTML = '';
-          window.POS.toast('Barcode captured: ' + code, 'success');
-        });
+        window.POS.openCameraScanner('product-scanner', scanResult, $('product-camera').value);
+      });
+      $('product-camera').addEventListener('change', function () {
+        if ($('product-scanner').innerHTML.trim() === '') return;
+        window.POS.openCameraScanner('product-scanner', scanResult, this.value);
       });
       $('cancel-product').addEventListener('click', window.POS.closeModal);
       $('save-product').addEventListener('click', async function () {

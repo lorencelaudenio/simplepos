@@ -221,15 +221,26 @@
   }
 
   function scanModal() {
-    const body = '<p class="muted small">Allow camera access when prompted, then point the camera at a barcode.</p>'
-      + '<div id="cashier-scanner" style="width:100%;min-height:220px"></div>'
+    const body = '<p class="muted small">Allow camera access when prompted, then point your desktop webcam or phone camera at a barcode.</p>'
+      + '<label class="field">Camera<select id="cashier-camera"><option value="">Default camera</option></select></label>'
+      + '<div id="cashier-scanner" style="width:100%;min-height:220px;margin-top:10px"></div>'
       + '<label class="field" style="margin-top:14px">Or enter barcode manually'
       + '<input id="manual-barcode" type="text" placeholder="Type or paste barcode" autocomplete="off"></label>';
     const footer = '<button class="btn btn-primary" id="use-manual-barcode" type="button">Add Product</button>'
       + '<button class="btn btn-ghost" id="scan-close" type="button">Cancel</button>';
     window.POS.openModal('Scan Barcode', body, footer);
     window.POS.onModalClose = function () { window.POS.closeCameraScanner(); };
-    window.POS.openCameraScanner('cashier-scanner', function (code) { addByBarcode(code); window.POS.closeModal(); });
+
+    function addScanned(code) {
+      addByBarcode(code);
+      window.POS.closeModal();
+    }
+
+    window.POS.populateCameraSelect('cashier-camera');
+    window.POS.openCameraScanner('cashier-scanner', addScanned);
+    $('cashier-camera').addEventListener('change', function () {
+      window.POS.openCameraScanner('cashier-scanner', addScanned, this.value);
+    });
     $('use-manual-barcode').addEventListener('click', function () {
       const code = $('manual-barcode').value.trim();
       if (!code) { window.POS.toast('Enter a barcode first.', 'error'); return; }

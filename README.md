@@ -7,8 +7,8 @@ A lightweight, responsive point-of-sale system built with native PHP 8.1+, MySQL
 - PHP 8.1 or newer with `pdo_mysql`, `zip`, `simplexml`, and `fileinfo` enabled
 - MySQL 5.7+ or MariaDB 10.4+
 - Apache (`.htaccess` files are included) or Nginx with equivalent deny rules
-- Internet access for CDN assets: Bootstrap Icons, Chart.js, and html5-qrcode (mobile camera scanner)
-- HTTPS (or localhost) for mobile camera barcode scanning, as required by browser camera permissions
+- Internet access for CDN assets: Bootstrap Icons, Chart.js, and html5-qrcode (browser camera barcode scanner)
+- HTTPS (or localhost) for browser camera barcode scanning on desktop or mobile, as required by browser permissions
 
 ## Installation
 
@@ -28,7 +28,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 - **Public hero page:** the root URL (`index.php`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages.
 - **Open signup with email activation:** clients register themselves, then activate a 24-hour link sent through SMTP; accounts stay inactive until confirmed.
 - **Multi-user, one app:** Website Administrators see an Admin Dashboard (overview, users, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. API endpoints enforce these roles server-side.
-- **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), mobile camera scanner, cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts.
+- **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), desktop/mobile browser camera scanner with camera selection, cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts.
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
 - **Sales History:** Today/Yesterday/Week/Month/Year/Custom/All filters, total sales, receipt count, average transaction, Chart.js daily sales chart, transaction list, reprintable receipts, item-level Excel export respecting filters.
 - **Backup & Restore:** timestamped SQL download, SMTP email backup (PHPMailer when installed, built-in SMTP client otherwise), validated `.sql` upload, confirmation dialog, automatic safety backup before restore, admin-only access.
@@ -60,7 +60,7 @@ Backups contain `users`, `products`, `sales`, `sale_items`, `stock_movements`, a
 2. Click the activation link, sign in as the new Client, and confirm only POS tabs are visible.
 3. Add, edit, archive, restore, and delete products (with and without sales history).
 4. Add stock and confirm the movement history and low-stock alert update.
-5. Search by name and barcode; test a USB scanner and the mobile camera scanner.
+5. Search by name and barcode; test a USB scanner and the browser camera scanner on desktop and mobile.
 6. Check out with exact cash and with overpayment; verify change, receipt, and stock deduction.
 7. Attempt overselling and underpayment; confirm both are rejected by the server.
 8. Test low-stock filtering, Excel template/import preview/import/export, and duplicate barcode detection.
