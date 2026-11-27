@@ -169,9 +169,22 @@
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
 
+  async function sendTestEmail() {
+    const email = $('test-email-address').value.trim();
+    if (!email) { window.POS.toast('Enter an email address to test.', 'error'); return; }
+    try {
+      const data = await window.POS.api('api/settings.php?action=test_email', {
+        method: 'POST',
+        body: { email: email }
+      });
+      window.POS.toast(data.message || 'Test email sent.', 'success');
+    } catch (error) { window.POS.toast(error.message, 'error'); }
+  }
+
   function initSettings() {
     if (!$('settings-save-btn')) return;
     $('settings-save-btn').addEventListener('click', saveSettings);
+    $('settings-test-btn').addEventListener('click', sendTestEmail);
   }
 
   window.WebsiteSettings = { init: initSettings, onShow: loadSettings };

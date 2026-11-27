@@ -76,5 +76,22 @@ api_route(function () use ($action) {
         json_ok(['settings' => $publicSettings()], 'Settings saved successfully.');
     }
 
+    if ($action === 'test_email') {
+        $email = sval(request_body(), 'email');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            fail('Enter a valid email address.');
+        }
+        if (!smtp_configured()) {
+            fail('SMTP is not configured. Save your SMTP settings first.');
+        }
+        $store = get_setting('store_name', 'Simple Online POS');
+        send_pos_email(
+            $email,
+            $store . ' email test',
+            "This is a test email from " . $store . ".\n\nIf you received this, your SMTP settings are working."
+        );
+        json_ok([], 'Test email sent successfully.');
+    }
+
     fail('Unknown settings action.', 404);
 });

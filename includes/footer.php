@@ -41,11 +41,11 @@ $footerRole = $footerUser ? (string)$footerUser['role'] : '';
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="assets/js/app.js?v=2"></script>
-<script src="assets/js/cashier.js?v=2"></script>
-<script src="assets/js/inventory.js?v=2"></script>
-<script src="assets/js/sales.js?v=2"></script>
-<script src="assets/js/admin.js?v=2"></script>
-<script src="assets/js/backup.js?v=2"></script>
+<script src="assets/js/app.js?v=3"></script>
+<script src="assets/js/cashier.js?v=3"></script>
+<script src="assets/js/inventory.js?v=3"></script>
+<script src="assets/js/sales.js?v=3"></script>
+<script src="assets/js/admin.js?v=3"></script>
+<script src="assets/js/backup.js?v=3"></script>
 </body>
 </html>

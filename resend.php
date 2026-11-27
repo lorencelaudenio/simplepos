@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Resend activation - POS</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="assets/css/app.css?v=2">
+  <link rel="stylesheet" href="assets/css/app.css?v=3">
 </head>
 <body class="login-page">
   <main class="card login-card">

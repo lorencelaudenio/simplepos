@@ -196,7 +196,13 @@ if (!current_user()) {
       <label class="field">From Email<input type="email" id="setting-smtp_from"></label>
       <label class="field">From Name<input type="text" id="setting-smtp_from_name"></label>
     </div>
-    <button class="btn btn-primary" id="settings-save-btn" type="button" style="margin-top:14px"><i class="bi bi-check2-circle"></i> Save Settings</button>
+    <div class="row-between" style="margin-top:14px;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" id="settings-save-btn" type="button"><i class="bi bi-check2-circle"></i> Save Settings</button>
+      <div style="display:flex;gap:8px;flex:1;min-width:240px;justify-content:flex-end">
+        <input type="email" id="test-email-address" class="field" placeholder="your@email.com" aria-label="Test email address" style="flex:1;max-width:280px">
+        <button class="btn" id="settings-test-btn" type="button"><i class="bi bi-envelope-paper"></i> Send Test Email</button>
+      </div>
+    </div>
   </div>
 </section>
 

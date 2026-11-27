@@ -72,7 +72,13 @@ class SmtpMailer
             $message = str_replace("\n", "\r\n", $message);
             fwrite($this->socket, $message);
             $this->expect(250, $this->readResponse());
-            $this->command('QUIT', 221);
+            // Some servers close the socket immediately after accepting the message.
+            // The email is already delivered, so a failed QUIT handshake is not fatal.
+            try {
+                $this->command('QUIT', 221);
+            } catch (RuntimeException $ex) {
+                // Ignore cleanup-only SMTP errors.
+            }
         } finally {
             if (is_resource($this->socket)) {
                 fclose($this->socket);

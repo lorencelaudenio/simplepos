@@ -19,7 +19,7 @@ try {
   <meta name="referrer" content="same-origin">
   <title><?= e($storeName) ?> - POS</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="assets/css/app.css?v=2">
+  <link rel="stylesheet" href="assets/css/app.css?v=3">
 </head>
 <body>
 <header class="app-header">

@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($password !== $confirm) {
             $error = 'Passwords do not match.';
         } else {
+            $ref = strtoupper(bin2hex(random_bytes(3)));
             try {
                 $activation = activation_register(
                     db(),
@@ -51,15 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     activation_send_email($activation);
                 } catch (Throwable $mailError) {
                     activation_cleanup(db(), (int)$activation['user_id'], (string)$activation['token']);
-                    error_log('POS activation email error: ' . $mailError->getMessage());
-                    throw new RuntimeException('We could not send the activation email. Please try again later.');
+                    error_log('POS activation email error [' . $ref . ']: ' . $mailError->getMessage());
+                    throw new RuntimeException('Mail delivery failed.');
                 }
                 $success = true;
             } catch (ApiException $ex) {
                 $error = $ex->getMessage();
             } catch (Throwable $ex) {
-                error_log('POS signup error: ' . $ex->getMessage());
-                $error = 'Unable to create the account right now. Please try again.';
+                error_log('POS signup error [' . $ref . ']: ' . $ex->getMessage());
+                $error = 'Unable to create the account right now. Please try again. (Ref: ' . $ref . ')';
             }
         }
     }
@@ -72,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Create account - POS</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="assets/css/app.css?v=2">
+  <link rel="stylesheet" href="assets/css/app.css?v=3">
 </head>
 <body class="login-page">
   <main class="card login-card">
