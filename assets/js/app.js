@@ -148,6 +148,20 @@
     } catch (err) { return []; }
   }
 
+  function isMobileDevice() {
+    const ua = navigator.userAgent || '';
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(ua)
+      || (navigator.maxTouchPoints > 1 && window.matchMedia('(max-width: 900px)').matches);
+  }
+
+  function preferredCamera(cameras) {
+    const back = cameras.find(function (camera) {
+      return /back|rear|environment|world|main/i.test(camera.label || '');
+    });
+    // Phones usually list the front camera first and the back camera last.
+    return back || cameras[cameras.length - 1] || null;
+  }
+
   async function populateCameraSelect(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return;
@@ -155,7 +169,7 @@
     select.innerHTML = '';
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
-    defaultOption.textContent = 'Default camera';
+    defaultOption.textContent = isMobileDevice() ? 'Mobile back camera' : 'Default camera';
     select.appendChild(defaultOption);
     cameras.forEach(function (camera, index) {
       const option = document.createElement('option');
@@ -198,11 +212,17 @@
     if (cameraId) {
       await start({ deviceId: { exact: cameraId } });
     } else {
-      const started = await start({ facingMode: 'environment' });
+      // Phones should open the back camera for scanning; desktops fall back to their webcam.
+      const defaultSource = isMobileDevice()
+        ? { facingMode: { exact: 'environment' } }
+        : { facingMode: 'environment' };
+      const started = await start(defaultSource);
       if (!started) {
-        // Desktops usually have only a front-facing webcam; try any camera available.
         const cameras = await listCameras();
+        const preferred = preferredCamera(cameras);
+        if (preferred && await start({ deviceId: { exact: preferred.id } })) return;
         for (const camera of cameras) {
+          if (preferred && camera.id === preferred.id) continue;
           if (await start({ deviceId: { exact: camera.id } })) return;
         }
       } else {
