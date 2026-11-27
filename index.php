@@ -171,6 +171,19 @@ require_login();
       <tbody id="users-list"><tr><td colspan="6" class="center muted">Loading users...</td></tr></tbody>
     </table>
   </div>
+  <div class="card" style="padding:16px;margin-top:16px">
+    <div class="row-between" style="margin-bottom:12px">
+      <h2 class="card-title" style="margin:0"><i class="bi bi-ticket-perforated"></i> Signup Invite Codes</h2>
+      <button class="btn btn-sm btn-primary" id="generate-invite-btn" type="button"><i class="bi bi-plus-lg"></i> Generate Code</button>
+    </div>
+    <p class="muted small">Share a code with a cashier. Codes create Client accounts only, never administrators. Each code can expire or reach a usage limit, and can be revoked at any time.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Code</th><th>Created</th><th>Expires</th><th>Uses</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="invites-list"><tr><td colspan="6" class="center muted">Loading invite codes...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
 </section>
 
 <section class="tab-panel" id="panel-settings" aria-label="Website Settings">

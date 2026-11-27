@@ -17,6 +17,9 @@ if (isset($_GET['installed'])) {
 if (isset($_GET['logged_out'])) {
     $notice = 'You have been logged out.';
 }
+if (isset($_GET['signedup'])) {
+    $notice = 'Account created. You can sign in now.';
+}
 
 $dbReady = true;
 try {
@@ -76,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label class="field" style="margin-top:14px">Password<input type="password" name="password" autocomplete="current-password" required></label>
       <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign In</button>
     </form>
+    <p class="auth-link" style="margin-top:18px;margin-bottom:0">Have an invite code? <a href="signup.php">Create a client account</a></p>
   </main>
 </body>
 </html>

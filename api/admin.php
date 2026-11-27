@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/api_bootstrap.php';
+require_once __DIR__ . '/../includes/invites.php';
 
 $action = $_GET['action'] ?? '';
 
@@ -160,6 +161,26 @@ api_route(function () use ($action) {
         $stmt = $pdo->prepare('DELETE FROM users WHERE id = ?');
         $stmt->execute([$id]);
         json_ok([], 'User deleted successfully.');
+    }
+
+    if ($action === 'invite_list') {
+        json_ok(['invites' => invite_list($pdo)]);
+    }
+
+    if ($action === 'invite_create') {
+        $body = request_body();
+        $days = filter_var($body['days'] ?? null, FILTER_VALIDATE_INT);
+        $maxUses = filter_var($body['max_uses'] ?? null, FILTER_VALIDATE_INT);
+        if ($days === false || $maxUses === false) {
+            fail('Choose a valid expiry period and usage limit.');
+        }
+        $invite = invite_create($pdo, $myId, (int)$days, (int)$maxUses);
+        json_ok(['invite' => $invite], 'Invite code created: ' . $invite['code']);
+    }
+
+    if ($action === 'invite_revoke') {
+        invite_revoke($pdo, sval(request_body(), 'code'));
+        json_ok([], 'Invite code revoked.');
     }
 
     fail('Unknown admin action.', 404);

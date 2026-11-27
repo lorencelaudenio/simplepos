@@ -29,14 +29,3 @@ if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'], true) && !verify_csrf()) {
     exit;
 }
 
-function api_route(callable $handler): void
-{
-    try {
-        $handler();
-    } catch (ApiException $ex) {
-        json_out(['ok' => false, 'error' => $ex->getMessage()], $ex->httpStatus);
-    } catch (Throwable $ex) {
-        error_log('POS API error: ' . $ex->getMessage() . ' in ' . $ex->getFile() . ':' . $ex->getLine());
-        json_out(['ok' => false, 'error' => 'Unable to complete the request. Please try again.'], 500);
-    }
-}

@@ -57,6 +57,19 @@ function fail(string $message, int $status = 400): void
     throw new ApiException($message, $status);
 }
 
+/** Shared JSON error wrapper for authenticated and public API endpoints. */
+function api_route(callable $handler): void
+{
+    try {
+        $handler();
+    } catch (ApiException $ex) {
+        json_out(['ok' => false, 'error' => $ex->getMessage()], $ex->httpStatus);
+    } catch (Throwable $ex) {
+        error_log('POS API error: ' . $ex->getMessage() . ' in ' . $ex->getFile() . ':' . $ex->getLine());
+        json_out(['ok' => false, 'error' => 'Unable to complete the request. Please try again.'], 500);
+    }
+}
+
 function csrf_token(): string
 {
     if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {

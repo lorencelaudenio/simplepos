@@ -32,6 +32,17 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 - **Backup & Restore:** timestamped SQL download, SMTP email backup (PHPMailer when installed, built-in SMTP client otherwise), validated `.sql` upload, confirmation dialog, automatic safety backup before restore, admin-only access.
 - **Security:** PHP sessions, `password_hash()`/`password_verify()`, PDO prepared statements, CSRF tokens on all writes, server-side validation, escaped output, file upload checks, role enforcement, and web access denied to `config/`, `includes/`, `uploads/`, and `vendor/`.
 
+## Client signup
+
+Public registration is invite-only:
+
+1. Log in as Website Admin and open **Users → Signup Invite Codes**.
+2. Click **Generate Code**, choose an expiry and usage limit, then copy the code.
+3. Share the code privately with cashiers.
+4. The cashier opens `signup.php` from the login page, enters the code, and creates their own **Client** account.
+
+Invite codes never create administrators. They can expire, reach a usage limit, or be revoked at any time; revoking a code does not disable accounts already created with it.
+
 ## Optional: PHPMailer
 
 Composer is not required. The built-in SMTP client handles TLS, SSL, LOGIN authentication, and attachments. To use PHPMailer instead, run `composer install` in the project root; `vendor/autoload.php` will then be loaded automatically.
@@ -42,13 +53,14 @@ Backups contain `users`, `products`, `sales`, `sale_items`, `stock_movements`, a
 
 ## Before going live - verification checklist
 
-1. Log in as the administrator, open **Users**, and create at least one Client account for cashiers.
-2. Add, edit, archive, restore, and delete products (with and without sales history).
-3. Add stock and confirm the movement history and low-stock alert update.
-4. Search by name and barcode; test a USB scanner and the mobile camera scanner.
-5. Check out with exact cash and with overpayment; verify change, receipt, and stock deduction.
-6. Attempt overselling and underpayment; confirm both are rejected by the server.
-7. Test low-stock filtering, Excel template/import preview/import/export, and duplicate barcode detection.
-8. Check sales filters, chart, receipt reprinting, and filtered Excel export.
-9. Generate a backup, restore it, and verify the safety backup exists.
-10. Check the layout on desktop, tablet, and phone widths.
+1. Log in as the administrator, open **Users**, and generate an invite code.
+2. Open `signup.php`, redeem the code, and confirm the new Client can log in and only sees POS tabs.
+3. Add, edit, archive, restore, and delete products (with and without sales history).
+4. Add stock and confirm the movement history and low-stock alert update.
+5. Search by name and barcode; test a USB scanner and the mobile camera scanner.
+6. Check out with exact cash and with overpayment; verify change, receipt, and stock deduction.
+7. Attempt overselling and underpayment; confirm both are rejected by the server.
+8. Test low-stock filtering, Excel template/import preview/import/export, and duplicate barcode detection.
+9. Check sales filters, chart, receipt reprinting, and filtered Excel export.
+10. Generate a backup, restore it, and verify the safety backup exists.
+11. Check the layout on desktop, tablet, and phone widths.
