@@ -52,10 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->exec($statement);
                 }
                 $hash = password_hash($adminPass, PASSWORD_DEFAULT);
+                // Upsert so a retried installation does not fail on an existing admin username.
                 $stmt = $pdo->prepare(
-                    'INSERT INTO users (username, password, full_name, role, status) VALUES (?, ?, ?, "admin", "active")'
+                    'INSERT INTO users (username, password, full_name, role, status)
+                     VALUES (?, ?, ?, "admin", "active")
+                     ON DUPLICATE KEY UPDATE
+                        password = ?,
+                        full_name = ?,
+                        role = "admin",
+                        status = "active"'
                 );
-                $stmt->execute([$adminUser, $hash, $adminName !== '' ? $adminName : 'Administrator']);
+                $fullName = $adminName !== '' ? $adminName : 'Administrator';
+                $stmt->execute([$adminUser, $hash, $fullName, $hash, $fullName]);
                 $stmt = $pdo->prepare('UPDATE settings SET setting_value = ? WHERE setting_key = "store_name"');
                 $stmt->execute([$storeName]);
 
