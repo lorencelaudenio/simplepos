@@ -250,6 +250,7 @@
   }
 
   function init() {
+    if (!$('product-grid')) return;
     $('low-stock-pill').addEventListener('click', function () {
       window.POS.activateTab('inventory');
       $('low-stock-toggle').checked = true;

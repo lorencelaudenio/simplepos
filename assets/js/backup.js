@@ -49,32 +49,6 @@
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
 
-  async function loadSettings() {
-    try {
-      const data = await window.POS.api('api/settings.php?action=get');
-      const values = data.settings || {};
-      Object.keys(values).forEach(function (key) {
-        const input = $('setting-' + key);
-        if (input) input.value = values[key] == null ? '' : values[key];
-      });
-      const passNotice = document.querySelector('#setting-smtp_pass');
-      if (passNotice && values.smtp_pass_configured) passNotice.placeholder = 'Password saved — leave blank to keep';
-    } catch (error) { /* settings are optional for cashier use */ }
-  }
-
-  async function saveSettings() {
-    const keys = ['store_name', 'store_address', 'receipt_footer', 'smtp_host', 'smtp_port', 'smtp_secure',
-      'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_from_name'];
-    const payload = {};
-    keys.forEach(function (key) { payload[key] = $('setting-' + key).value.trim(); });
-    if (!payload.store_name) { window.POS.toast('Store name is required.', 'error'); return; }
-    try {
-      const data = await window.POS.api('api/settings.php?action=save', { method: 'POST', body: payload });
-      window.POS.toast(data.message, 'success');
-      loadSettings();
-    } catch (error) { window.POS.toast(error.message, 'error'); }
-  }
-
   function init() {
     if (!$('backup-download-btn')) return;
     $('backup-download-btn').addEventListener('click', function () {
@@ -83,8 +57,7 @@
     });
     $('backup-email-btn').addEventListener('click', openEmailModal);
     $('restore-btn').addEventListener('click', restoreBackup);
-    $('settings-save-btn').addEventListener('click', saveSettings);
   }
 
-  window.Backup = { init: init, onShow: loadSettings };
+  window.Backup = { init: init, onShow: function () {} };
 })();

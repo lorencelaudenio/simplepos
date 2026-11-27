@@ -7,6 +7,7 @@ require_once __DIR__ . '/../includes/xlsx.php';
 $action = $_GET['action'] ?? '';
 
 api_route(function () use ($action) {
+    require_pos_user();
     $pdo = db();
     $filter = (string)($_GET['filter'] ?? 'today');
     $from = (string)($_GET['from'] ?? '');

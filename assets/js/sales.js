@@ -84,6 +84,7 @@
   }
 
   function init() {
+    if (!$('sales-filters')) return;
     document.querySelectorAll('#sales-filters .filter-btn').forEach(function (button) {
       button.addEventListener('click', function () {
         filter = button.dataset.filter;

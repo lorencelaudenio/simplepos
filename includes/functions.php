@@ -163,6 +163,29 @@ function require_admin(): void
     }
 }
 
+/** POS users are stored with the "cashier" role and shown as Clients in the UI. */
+function is_pos_user(): bool
+{
+    $user = current_user();
+    return $user !== null && in_array((string)($user['role'] ?? ''), ['cashier', 'client'], true);
+}
+
+function role_label(string $role): string
+{
+    return match ($role) {
+        'admin' => 'Website Admin',
+        'cashier', 'client' => 'Client',
+        default => ucfirst($role),
+    };
+}
+
+function require_pos_user(): void
+{
+    if (!is_pos_user()) {
+        fail('This area is available to POS client accounts only.', 403);
+    }
+}
+
 function generate_receipt_number(PDO $pdo): string
 {
     $date = date('Ymd');

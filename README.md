@@ -25,6 +25,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 
 ## Features
 
+- **Multi-user, one app:** there are no separate pages. Website Administrators see an Admin Dashboard (overview, users, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. API endpoints enforce these roles server-side.
 - **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), mobile camera scanner, cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts.
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
 - **Sales History:** Today/Yesterday/Week/Month/Year/Custom/All filters, total sales, receipt count, average transaction, Chart.js daily sales chart, transaction list, reprintable receipts, item-level Excel export respecting filters.
@@ -41,12 +42,13 @@ Backups contain `users`, `products`, `sales`, `sale_items`, `stock_movements`, a
 
 ## Before going live - verification checklist
 
-1. Add, edit, archive, restore, and delete products (with and without sales history).
-2. Add stock and confirm the movement history and low-stock alert update.
-3. Search by name and barcode; test a USB scanner and the mobile camera scanner.
-4. Check out with exact cash and with overpayment; verify change, receipt, and stock deduction.
-5. Attempt overselling and underpayment; confirm both are rejected by the server.
-6. Test low-stock filtering, Excel template/import preview/import/export, and duplicate barcode detection.
-7. Check sales filters, chart, receipt reprinting, and filtered Excel export.
-8. Generate a backup, restore it, and verify the safety backup exists.
-9. Check the layout on desktop, tablet, and phone widths.
+1. Log in as the administrator, open **Users**, and create at least one Client account for cashiers.
+2. Add, edit, archive, restore, and delete products (with and without sales history).
+3. Add stock and confirm the movement history and low-stock alert update.
+4. Search by name and barcode; test a USB scanner and the mobile camera scanner.
+5. Check out with exact cash and with overpayment; verify change, receipt, and stock deduction.
+6. Attempt overselling and underpayment; confirm both are rejected by the server.
+7. Test low-stock filtering, Excel template/import preview/import/export, and duplicate barcode detection.
+8. Check sales filters, chart, receipt reprinting, and filtered Excel export.
+9. Generate a backup, restore it, and verify the safety backup exists.
+10. Check the layout on desktop, tablet, and phone widths.

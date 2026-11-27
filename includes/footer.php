@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+$footerUser = current_user();
+$footerRole = $footerUser ? (string)$footerUser['role'] : '';
 ?>
 </main>
 
@@ -33,7 +35,8 @@ declare(strict_types=1);
   window.POS_CONFIG = {
     csrfToken: <?= json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
     isAdmin: <?= is_admin() ? 'true' : 'false' ?>,
-    storeName: <?= json_encode(get_setting('store_name', 'My Store'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+    storeName: <?= json_encode(get_setting('store_name', 'My Store'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+    userRole: <?= json_encode($footerRole) ?>
   };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -42,6 +45,7 @@ declare(strict_types=1);
 <script src="assets/js/cashier.js?v=1"></script>
 <script src="assets/js/inventory.js?v=1"></script>
 <script src="assets/js/sales.js?v=1"></script>
+<script src="assets/js/admin.js?v=1"></script>
 <script src="assets/js/backup.js?v=1"></script>
 </body>
 </html>

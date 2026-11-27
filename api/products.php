@@ -25,6 +25,7 @@ function format_product(array $p): array
 $action = $_GET['action'] ?? '';
 
 api_route(function () use ($action) {
+    require_pos_user();
     $pdo = db();
 
     if ($action === 'list' || $action === 'search') {

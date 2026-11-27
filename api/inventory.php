@@ -47,6 +47,7 @@ function stock_adjust(PDO $pdo, int $productId, int $quantity, string $notes): a
 $action = $_GET['action'] ?? '';
 
 api_route(function () use ($action) {
+    require_pos_user();
     $pdo = db();
 
     if ($action === 'add_stock') {

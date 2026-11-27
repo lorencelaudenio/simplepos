@@ -43,6 +43,7 @@ function sale_details(PDO $pdo, int $saleId): ?array
 $action = $_GET['action'] ?? '';
 
 api_route(function () use ($action) {
+    require_pos_user();
     $pdo = db();
 
     if ($action === 'token') {

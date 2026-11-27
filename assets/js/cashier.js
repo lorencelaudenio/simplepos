@@ -240,6 +240,7 @@
   }
 
   function init() {
+    if (!$('product-search')) return;
     $('product-search').addEventListener('input', function () {
       clearTimeout(searchTimer);
       searchTimer = setTimeout(searchProducts, 180);

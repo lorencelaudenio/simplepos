@@ -8,6 +8,7 @@ require_login();
 ?>
 <?php include __DIR__ . '/includes/header.php'; ?>
 
+<?php if (!is_admin()): ?>
 <section class="tab-panel active" id="panel-cashier" aria-label="Cashier">
   <div class="page-heading">
     <div><h1>Cashier</h1><p>Search a product or scan its barcode, then collect payment.</p></div>
@@ -126,8 +127,75 @@ require_login();
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <?php if (is_admin()): ?>
+<section class="tab-panel active" id="panel-dashboard" aria-label="Admin Dashboard">
+  <div class="page-heading">
+    <div><h1>Website Admin Dashboard</h1><p>Manage accounts, website settings, and database backups.</p></div>
+    <span class="badge badge-green"><i class="bi bi-shield-lock"></i> Administrator</span>
+  </div>
+  <div class="summary-grid">
+    <div class="card summary-card">
+      <h2 class="card-title"><i class="bi bi-people"></i> Accounts</h2>
+      <div class="summary-stat"><div class="label">Total Users</div><div class="value" id="admin-users">0</div></div>
+      <div class="summary-stat"><div class="label">POS Clients</div><div class="value" id="admin-clients">0</div></div>
+    </div>
+    <div class="card summary-card">
+      <h2 class="card-title"><i class="bi bi-graph-up"></i> Store Overview</h2>
+      <div class="summary-stat"><div class="label">Active Products</div><div class="value" id="admin-products">0</div></div>
+      <div class="summary-stat"><div class="label">Low Stock Alerts</div><div class="value" id="admin-lowstock">0</div></div>
+      <div class="summary-stat"><div class="label">All-Time Sales</div><div class="value" id="admin-sales-total">₱0.00</div></div>
+    </div>
+  </div>
+  <div class="card" style="padding:16px">
+    <div class="row-between" style="margin-bottom:12px"><h2 class="card-title" style="margin:0">Recent Transactions</h2><span class="badge badge-gray" id="admin-receipts">0 receipts</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Receipt #</th><th>Date &amp; Time</th><th>Total</th></tr></thead>
+        <tbody id="admin-recent-sales"><tr><td colspan="3" class="center muted">No sales recorded yet.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="tab-panel" id="panel-users" aria-label="Users">
+  <div class="page-heading">
+    <div><h1>Users</h1><p>Create website administrators and POS client accounts.</p></div>
+    <button class="btn btn-primary" id="add-user-btn" type="button"><i class="bi bi-person-plus"></i> Add User</button>
+  </div>
+  <div class="notice"><i class="bi bi-info-circle"></i> Client accounts use the Cashier, Inventory, and Sales History tabs. Website administrators only see this admin dashboard.</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody id="users-list"><tr><td colspan="6" class="center muted">Loading users...</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="tab-panel" id="panel-settings" aria-label="Website Settings">
+  <div class="page-heading">
+    <div><h1>Website Settings</h1><p>Store identity, receipt message, and outgoing mail configuration.</p></div>
+  </div>
+  <div class="card backup-card">
+    <div class="settings-grid">
+      <label class="field">Store Name<input type="text" id="setting-store_name"></label>
+      <label class="field">Store Address<input type="text" id="setting-store_address"></label>
+      <label class="field span-2">Receipt Footer<input type="text" id="setting-receipt_footer"></label>
+      <label class="field">SMTP Host<input type="text" id="setting-smtp_host" placeholder="smtp.example.com"></label>
+      <label class="field">SMTP Port<input type="number" id="setting-smtp_port" value="587"></label>
+      <label class="field">Security
+        <select id="setting-smtp_secure"><option value="tls">TLS (STARTTLS)</option><option value="ssl">SSL</option><option value="none">None</option></select>
+      </label>
+      <label class="field">SMTP Username<input type="text" id="setting-smtp_user" autocomplete="off"></label>
+      <label class="field">SMTP Password<input type="password" id="setting-smtp_pass" placeholder="Leave blank to keep current" autocomplete="new-password"></label>
+      <label class="field">From Email<input type="email" id="setting-smtp_from"></label>
+      <label class="field">From Name<input type="text" id="setting-smtp_from_name"></label>
+    </div>
+    <button class="btn btn-primary" id="settings-save-btn" type="button" style="margin-top:14px"><i class="bi bi-check2-circle"></i> Save Settings</button>
+  </div>
+</section>
+
 <section class="tab-panel" id="panel-backup" aria-label="Backup and Restore">
   <div class="page-heading">
     <div><h1>Backup &amp; Restore</h1><p>Protect your data and restore a previous database snapshot.</p></div>
@@ -154,24 +222,6 @@ require_login();
       <label class="field">Backup File<input type="file" id="restore-file" accept=".sql,application/sql"></label>
       <button class="btn btn-danger btn-block" id="restore-btn" type="button" style="margin-top:12px"><i class="bi bi-exclamation-octagon"></i> Restore Backup</button>
     </div>
-  </div>
-  <div class="card backup-card" style="margin-top:16px">
-    <h2 class="card-title"><i class="bi bi-sliders2"></i> Store &amp; SMTP Settings</h2>
-    <div class="settings-grid">
-      <label class="field">Store Name<input type="text" id="setting-store_name"></label>
-      <label class="field">Store Address<input type="text" id="setting-store_address"></label>
-      <label class="field span-2">Receipt Footer<input type="text" id="setting-receipt_footer"></label>
-      <label class="field">SMTP Host<input type="text" id="setting-smtp_host" placeholder="smtp.example.com"></label>
-      <label class="field">SMTP Port<input type="number" id="setting-smtp_port" value="587"></label>
-      <label class="field">Security
-        <select id="setting-smtp_secure"><option value="tls">TLS (STARTTLS)</option><option value="ssl">SSL</option><option value="none">None</option></select>
-      </label>
-      <label class="field">SMTP Username<input type="text" id="setting-smtp_user" autocomplete="off"></label>
-      <label class="field">SMTP Password<input type="password" id="setting-smtp_pass" placeholder="Leave blank to keep current" autocomplete="new-password"></label>
-      <label class="field">From Email<input type="email" id="setting-smtp_from"></label>
-      <label class="field">From Name<input type="text" id="setting-smtp_from_name"></label>
-    </div>
-    <button class="btn btn-primary" id="settings-save-btn" type="button" style="margin-top:14px"><i class="bi bi-check2-circle"></i> Save Settings</button>
   </div>
 </section>
 <?php endif; ?>

@@ -217,8 +217,10 @@
   window.POS = POS;
 
   function activateTab(name) {
-    const valid = ['cashier', 'inventory', 'sales', 'backup'];
-    if (valid.indexOf(name) === -1 || (name === 'backup' && !config.isAdmin)) name = 'cashier';
+    const valid = config.isAdmin
+      ? ['dashboard', 'users', 'settings', 'backup']
+      : ['cashier', 'inventory', 'sales'];
+    if (valid.indexOf(name) === -1) name = valid[0];
     document.querySelectorAll('.nav-tab').forEach(function (button) {
       button.classList.toggle('active', button.dataset.tab === name);
     });
@@ -226,8 +228,17 @@
       panel.classList.toggle('active', panel.id === 'panel-' + name);
     });
     if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
-    const module = { cashier: window.Cashier, inventory: window.Inventory, sales: window.Sales, backup: window.Backup }[name];
-    if (module && typeof module.onShow === 'function') module.onShow();
+    const modules = {
+      cashier: window.Cashier,
+      inventory: window.Inventory,
+      sales: window.Sales,
+      dashboard: window.AdminDashboard,
+      users: window.Users,
+      settings: window.WebsiteSettings,
+      backup: window.Backup
+    };
+    const module = modules[name];
+    if (module && typeof module.onShow === 'function') module.onShow(name);
   }
   POS.activateTab = activateTab;
 
@@ -248,7 +259,7 @@
       else if (!document.getElementById('app-modal').classList.contains('hidden')) closeModal();
     });
 
-    ['Cashier', 'Inventory', 'Sales', 'Backup'].forEach(function (name) {
+    ['Cashier', 'Inventory', 'Sales', 'AdminDashboard', 'Users', 'WebsiteSettings', 'Backup'].forEach(function (name) {
       const module = window[name];
       if (module && typeof module.init === 'function') module.init();
     });
