@@ -3,8 +3,12 @@ declare(strict_types=1);
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/functions.php';
-require_login();
 
+// Guests see a public hero/landing page; signed-in users get their dashboard.
+if (!current_user()) {
+    include __DIR__ . '/includes/hero.php';
+    exit;
+}
 ?>
 <?php include __DIR__ . '/includes/header.php'; ?>
 
