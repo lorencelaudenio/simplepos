@@ -170,6 +170,39 @@
     return back || cameras[cameras.length - 1] || null;
   }
 
+  function withTimeout(promise, milliseconds, message) {
+    return new Promise(function (resolve, reject) {
+      const timer = setTimeout(function () { reject(new Error(message)); }, milliseconds);
+      Promise.resolve(promise).then(function (value) {
+        clearTimeout(timer);
+        resolve(value);
+      }, function (err) {
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
+  }
+
+  function waitForVideo(hostId, milliseconds) {
+    return new Promise(function (resolve) {
+      const started = Date.now();
+      function check() {
+        const host = document.getElementById(hostId);
+        const video = host ? host.querySelector('video') : null;
+        if (video && video.readyState >= 2 && video.videoWidth > 0) {
+          resolve(true);
+          return;
+        }
+        if (Date.now() - started >= milliseconds) {
+          resolve(false);
+          return;
+        }
+        setTimeout(check, 100);
+      }
+      check();
+    });
+  }
+
   async function populateCameraSelect(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return;
@@ -207,16 +240,22 @@
       closeCameraScanner();
       const scanner = new window.Html5Qrcode(hostId, { verbose: false });
       qrScanner = scanner;
+      let completed = false;
       try {
-        await scanner.start(
+        await withTimeout(scanner.start(
           source,
           { fps: 12, qrbox: { width: 260, height: 160 } },
           function (decodedText) {
+            completed = true;
             closeCameraScanner();
             onResult(String(decodedText).trim());
           },
           function () { /* ignore frames without a barcode */ }
-        );
+        ), 7000, 'Camera start timed out.');
+        if (completed) return true;
+        if (!(await waitForVideo(hostId, 3000))) {
+          throw new Error('Camera preview did not start.');
+        }
         if (typeof onStarted === 'function') onStarted();
         return true;
       } catch (err) {
@@ -226,28 +265,32 @@
       }
     }
 
+    const mobile = isMobileDevice();
+
     if (cameraId) {
-      await start({ deviceId: { exact: cameraId } });
-    } else {
-      // Phones should open the back camera for scanning; desktops fall back to their webcam.
-      const defaultSource = isMobileDevice()
-        ? { facingMode: { exact: 'environment' } }
-        : { facingMode: 'environment' };
-      const started = await start(defaultSource);
-      if (!started) {
-        const cameras = await listCameras();
-        const preferred = preferredCamera(cameras);
-        if (preferred && await start({ deviceId: { exact: preferred.id } })) return;
-        for (const camera of cameras) {
-          if (preferred && camera.id === preferred.id) continue;
-          if (await start({ deviceId: { exact: camera.id } })) return;
-        }
-      } else {
+      if (await start({ deviceId: { exact: cameraId } })) return;
+    } else if (mobile) {
+      // Prefer the back camera, but never leave the scanner stuck if that camera hangs.
+      if (await start({ facingMode: 'environment' })) return;
+      if (await start({ facingMode: 'user' })) {
+        toast('Back camera did not start; switched to the front camera.', '');
         return;
+      }
+      const cameras = await listCameras();
+      const preferred = preferredCamera(cameras);
+      if (preferred && await start({ deviceId: { exact: preferred.id } })) return;
+      for (const camera of cameras) {
+        if (preferred && camera.id === preferred.id) continue;
+        if (await start({ deviceId: { exact: camera.id } })) return;
+      }
+    } else {
+      if (await start({ facingMode: 'environment' })) return;
+      const cameras = await listCameras();
+      for (const camera of cameras) {
+        if (await start({ deviceId: { exact: camera.id } })) return;
       }
     }
 
-    if (qrScanner) return;
     const reason = lastError && lastError.message ? lastError.message : 'permission denied';
     const hint = /denied|notallowed|permission/i.test(reason)
       ? ' On iPhone, use HTTPS and allow Camera in Safari Settings → Website Settings for this site, then reload.'
