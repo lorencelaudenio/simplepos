@@ -1,3 +1,7 @@
+# Always serve the POS dashboard as the directory index.
+DirectoryIndex index.php index.html
+
+# Disable directory listings if mod_autoindex is active.
 Options -Indexes
 
 <IfModule mod_headers.c>
