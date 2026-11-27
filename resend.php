@@ -18,12 +18,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf($_POST['csrf_token'] ?? '')) {
         $error = 'Invalid security token. Please refresh the page.';
     } elseif (!smtp_configured()) {
-        $error = 'Email delivery is not configured. Please contact the administrator.';
+        error_log('POS activation resend blocked: SMTP is not configured.');
+        $error = 'We could not send the email. Please try again later.';
     } else {
         $email = trim((string)($_POST['email'] ?? ''));
         try {
             $activation = activation_resend(db(), $email);
-            activation_send_email($activation);
+            try {
+                activation_send_email($activation);
+            } catch (Throwable $mailError) {
+                error_log('POS activation resend email error: ' . $mailError->getMessage());
+                throw new RuntimeException('We could not send the email. Please try again later.');
+            }
             $success = true;
         } catch (ApiException $ex) {
             $error = $ex->getMessage();

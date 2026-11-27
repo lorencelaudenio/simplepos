@@ -208,7 +208,7 @@ function activation_activate(PDO $pdo, string $token): array
         }
         $activation = json_decode((string)$raw, true);
         if (!is_array($activation)) {
-            fail('This activation link is unreadable.', 500);
+            fail('This activation link is invalid or has expired.', 400);
         }
         if (strtotime((string)$activation['expires_at']) < time()) {
             fail('This activation link has expired. Request a new one.', 400);
@@ -218,7 +218,7 @@ function activation_activate(PDO $pdo, string $token): array
         $update = $pdo->prepare('UPDATE users SET status = "active" WHERE id = ?');
         $update->execute([$userId]);
         if ($update->rowCount() === 0) {
-            fail('Account not found.', 404);
+            fail('This activation link is invalid or has expired.', 400);
         }
 
         $emailData = json_encode([
@@ -254,7 +254,7 @@ function activation_resend(PDO $pdo, string $email): array
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user) {
-        fail('Account not found.', 404);
+        fail('No pending account was found for that email address.', 404);
     }
     if ($user['status'] === 'active') {
         fail('This account is already active. You can sign in.', 400);

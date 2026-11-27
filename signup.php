@@ -25,9 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf($_POST['csrf_token'] ?? '')) {
         $error = 'Invalid security token. Please refresh the page.';
     } elseif (!$dbReady) {
-        $error = 'The database is not configured. Please contact the website administrator.';
+        $error = 'Registration is temporarily unavailable. Please try again later.';
     } elseif (!smtp_configured()) {
-        $error = 'Email activation is not configured yet. Ask the administrator to set up SMTP.';
+        error_log('POS signup blocked: SMTP is not configured.');
+        $error = 'Registration is temporarily unavailable. Please try again later.';
     } else {
         $values['username'] = trim((string)($_POST['username'] ?? ''));
         $values['full_name'] = trim((string)($_POST['full_name'] ?? ''));
@@ -51,16 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } catch (Throwable $mailError) {
                     activation_cleanup(db(), (int)$activation['user_id'], (string)$activation['token']);
                     error_log('POS activation email error: ' . $mailError->getMessage());
-                    throw new RuntimeException('We could not send the activation email. Please check the SMTP settings or try again later.');
+                    throw new RuntimeException('We could not send the activation email. Please try again later.');
                 }
                 $success = true;
             } catch (ApiException $ex) {
                 $error = $ex->getMessage();
             } catch (Throwable $ex) {
                 error_log('POS signup error: ' . $ex->getMessage());
-                $error = $ex->getMessage() === 'We could not send the activation email. Please check the SMTP settings or try again later.'
-                    ? $ex->getMessage()
-                    : 'Unable to create the account right now. Please try again.';
+                $error = 'Unable to create the account right now. Please try again.';
             }
         }
     }
@@ -81,10 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>Create a client account</h1>
     <p>Register below, then activate your account using the link we email to you.</p>
     <?php if ($error !== ''): ?><div class="login-error"><?= e($error) ?></div><?php endif; ?>
-    <?php if (!$dbReady): ?>
-      <div class="notice"><i class="bi bi-info-circle"></i> Database not configured. Please contact your administrator.</div>
-    <?php elseif (!smtp_configured()): ?>
-      <div class="notice"><i class="bi bi-info-circle"></i> SMTP is not configured. Self-signup is temporarily unavailable.</div>
+    <?php if (!$dbReady || !smtp_configured()): ?>
+      <div class="notice"><i class="bi bi-info-circle"></i> Registration is temporarily unavailable. Please try again later.</div>
     <?php endif; ?>
     <?php if ($success): ?>
       <div class="login-success"><i class="bi bi-envelope-check-fill"></i> Check <strong><?= e($values['email']) ?></strong> for your activation link. The link expires in 24 hours.</div>

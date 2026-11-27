@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf($_POST['csrf_token'] ?? '')) {
         $error = 'Invalid security token. Please refresh the page.';
     } elseif (!$dbReady) {
-        $error = 'The database is not configured. Please run install.php first.';
+        $error = 'Sign-in is temporarily unavailable. Please try again later.';
     } else {
         $username = trim((string)($_POST['username'] ?? ''));
         $password = (string)($_POST['password'] ?? '');
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($notice !== ''): ?><div class="login-error" style="background:var(--green-soft);color:var(--green-dark)"><?= e($notice) ?></div><?php endif; ?>
     <?php if ($error !== ''): ?><div class="login-error"><?= e($error) ?></div><?php endif; ?>
     <?php if (!$dbReady): ?>
-      <div class="notice"><i class="bi bi-info-circle"></i> Database not configured. <a href="install.php">Run the installer</a>.</div>
+      <div class="notice"><i class="bi bi-info-circle"></i> Sign-in is temporarily unavailable. Please try again later.</div>
     <?php endif; ?>
     <form method="post" action="login.php">
       <?= csrf_input() ?>
