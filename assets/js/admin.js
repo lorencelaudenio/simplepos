@@ -6,7 +6,6 @@
   let users = [];
 
   function esc(value) { return window.POS.esc(value); }
-  function money(value) { return window.POS.money(value); }
 
   /* ---------- Admin overview ---------- */
   async function loadOverview() {
@@ -16,17 +15,6 @@
       const o = data.overview || {};
       $('admin-users').textContent = String(o.users || 0);
       $('admin-clients').textContent = String(o.clients || 0);
-      $('admin-products').textContent = String(o.products || 0);
-      $('admin-lowstock').textContent = String(o.low_stock || 0);
-      $('admin-sales-total').textContent = money(o.sales_total);
-      $('admin-receipts').textContent = (o.receipts || 0) + ' receipt' + (o.receipts === 1 ? '' : 's');
-      const sales = data.recent_sales || [];
-      $('admin-recent-sales').innerHTML = sales.length
-        ? sales.map(function (sale) {
-          return '<tr><td><strong>' + esc(sale.receipt_number) + '</strong></td><td>'
-            + esc(String(sale.created_at).replace('T', ' ')) + '</td><td>' + money(sale.total_amount) + '</td></tr>';
-        }).join('')
-        : '<tr><td colspan="3" class="center muted">No sales recorded yet.</td></tr>';
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
 

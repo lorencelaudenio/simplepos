@@ -15,30 +15,11 @@ api_route(function () use ($action) {
     if ($action === 'overview') {
         $userCount = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
         $clientCount = (int)$pdo->query('SELECT COUNT(*) FROM users WHERE role IN ("cashier", "client")')->fetchColumn();
-        $productCount = (int)$pdo->query('SELECT COUNT(*) FROM products WHERE status = "active"')->fetchColumn();
-        $lowStock = low_stock_count($pdo);
-        $salesRow = $pdo->query('SELECT COUNT(*) AS receipts, COALESCE(SUM(total_amount), 0) AS total FROM sales')->fetch();
-        $recentStmt = $pdo->query(
-            'SELECT receipt_number, created_at, total_amount FROM sales ORDER BY id DESC LIMIT 5'
-        );
-        $recent = [];
-        foreach ($recentStmt->fetchAll() as $sale) {
-            $recent[] = [
-                'receipt_number' => (string)$sale['receipt_number'],
-                'created_at' => (string)$sale['created_at'],
-                'total_amount' => (float)$sale['total_amount'],
-            ];
-        }
         json_ok([
             'overview' => [
                 'users' => $userCount,
                 'clients' => $clientCount,
-                'products' => $productCount,
-                'low_stock' => $lowStock,
-                'receipts' => (int)$salesRow['receipts'],
-                'sales_total' => round((float)$salesRow['total'], 2),
             ],
-            'recent_sales' => $recent,
         ]);
     }
 

@@ -157,27 +157,10 @@ if (!current_user()) {
     <div><h1>Website Admin Dashboard</h1><p>Manage accounts, website settings, and database backups.</p></div>
     <span class="badge badge-green"><i class="bi bi-shield-lock"></i> Administrator</span>
   </div>
-  <div class="summary-grid">
-    <div class="card summary-card">
-      <h2 class="card-title"><i class="bi bi-people"></i> Accounts</h2>
-      <div class="summary-stat"><div class="label">Total Users</div><div class="value" id="admin-users">0</div></div>
-      <div class="summary-stat"><div class="label">POS Clients</div><div class="value" id="admin-clients">0</div></div>
-    </div>
-    <div class="card summary-card">
-      <h2 class="card-title"><i class="bi bi-graph-up"></i> Store Overview</h2>
-      <div class="summary-stat"><div class="label">Active Products</div><div class="value" id="admin-products">0</div></div>
-      <div class="summary-stat"><div class="label">Low Stock Alerts</div><div class="value" id="admin-lowstock">0</div></div>
-      <div class="summary-stat"><div class="label">All-Time Sales</div><div class="value" id="admin-sales-total">₱0.00</div></div>
-    </div>
-  </div>
-  <div class="card" style="padding:16px">
-    <div class="row-between" style="margin-bottom:12px"><h2 class="card-title" style="margin:0">Recent Transactions</h2><span class="badge badge-gray" id="admin-receipts">0 receipts</span></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Receipt #</th><th>Date &amp; Time</th><th>Total</th></tr></thead>
-        <tbody id="admin-recent-sales"><tr><td colspan="3" class="center muted">No sales recorded yet.</td></tr></tbody>
-      </table>
-    </div>
+  <div class="card summary-card" style="margin-bottom:16px">
+    <h2 class="card-title"><i class="bi bi-people"></i> Accounts</h2>
+    <div class="summary-stat"><div class="label">Total Users</div><div class="value" id="admin-users">0</div></div>
+    <div class="summary-stat"><div class="label">POS Clients</div><div class="value" id="admin-clients">0</div></div>
   </div>
 </section>
 
