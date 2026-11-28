@@ -134,9 +134,12 @@
 
   window.Users = { init: initUsers, onShow: loadUsers };
 
-  /* ---------- Website settings ---------- */
+  /* ---------- Settings and account ---------- */
+  const settingKeys = ['store_name', 'store_address', 'receipt_footer', 'smtp_host', 'smtp_port', 'smtp_secure',
+    'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_from_name'];
+
   async function loadSettings() {
-    if (!$('setting-store_name')) return;
+    if (!$('settings-save-btn')) return;
     try {
       const data = await window.POS.api('api/settings.php?action=get');
       const values = data.settings || {};
@@ -150,13 +153,12 @@
   }
 
   async function saveSettings() {
-    const keys = ['store_name', 'store_address', 'receipt_footer', 'smtp_host', 'smtp_port', 'smtp_secure',
-      'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_from_name'];
     const payload = {};
-    keys.forEach(function (key) {
+    settingKeys.forEach(function (key) {
       const input = $('setting-' + key);
-      payload[key] = input ? input.value.trim() : '';
+      if (input) payload[key] = input.value.trim();
     });
+    if (Object.keys(payload).length === 0) return;
     try {
       const data = await window.POS.api('api/settings.php?action=save', { method: 'POST', body: payload });
       const saved = data.settings || {};
@@ -172,8 +174,40 @@
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
 
+  async function loadAccount() {
+    if (!$('account-save-btn')) return;
+    try {
+      const data = await window.POS.api('api/profile.php?action=get');
+      const profile = data.profile || {};
+      ['full_name', 'email'].forEach(function (key) {
+        const input = $('account-' + key);
+        if (input) input.value = profile[key] == null ? '' : profile[key];
+      });
+    } catch (error) { window.POS.toast(error.message, 'error'); }
+  }
+
+  async function saveAccount() {
+    if (!$('account-save-btn')) return;
+    const payload = {
+      full_name: $('account-full_name').value.trim(),
+      email: $('account-email').value.trim(),
+      current_password: $('account-current_password').value,
+      new_password: $('account-new_password').value,
+      confirm_password: $('account-confirm_password').value
+    };
+    try {
+      const data = await window.POS.api('api/profile.php?action=save', { method: 'POST', body: payload });
+      ['account-current_password', 'account-new_password', 'account-confirm_password'].forEach(function (id) {
+        const input = $(id);
+        if (input) input.value = '';
+      });
+      window.POS.toast(data.message || 'Account updated.', 'success');
+    } catch (error) { window.POS.toast(error.message, 'error'); }
+  }
+
   async function sendTestEmail() {
-    const email = $('test-email-address').value.trim();
+    const input = $('test-email-address');
+    const email = input ? input.value.trim() : '';
     if (!email) { window.POS.toast('Enter an email address to test.', 'error'); return; }
     try {
       const data = await window.POS.api('api/settings.php?action=test_email', {
@@ -185,10 +219,19 @@
   }
 
   function initSettings() {
-    if (!$('settings-save-btn')) return;
-    $('settings-save-btn').addEventListener('click', saveSettings);
-    $('settings-test-btn').addEventListener('click', sendTestEmail);
+    const saveBtn = $('settings-save-btn');
+    if (saveBtn) saveBtn.addEventListener('click', saveSettings);
+    const testBtn = $('settings-test-btn');
+    if (testBtn) testBtn.addEventListener('click', sendTestEmail);
+    const accountBtn = $('account-save-btn');
+    if (accountBtn) accountBtn.addEventListener('click', saveAccount);
   }
 
-  window.WebsiteSettings = { init: initSettings, onShow: loadSettings };
+  window.WebsiteSettings = {
+    init: initSettings,
+    onShow: function () {
+      loadSettings();
+      loadAccount();
+    }
+  };
 })();

@@ -131,6 +131,24 @@ if (!current_user()) {
     </div>
   </div>
 </section>
+
+<section class="tab-panel" id="panel-settings" aria-label="Settings">
+  <div class="page-heading">
+    <div><h1>Settings</h1><p>Manage store receipt details and your account.</p></div>
+  </div>
+  <div class="card backup-card">
+    <h2 class="card-title"><i class="bi bi-shop"></i> Store Settings</h2>
+    <div class="settings-grid">
+      <label class="field">Store Name<input type="text" id="setting-store_name"></label>
+      <label class="field">Store Address<input type="text" id="setting-store_address"></label>
+      <label class="field span-2">Receipt Footer<input type="text" id="setting-receipt_footer"></label>
+    </div>
+    <div class="row-between" style="margin-top:14px;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" id="settings-save-btn" type="button"><i class="bi bi-check2-circle"></i> Save Store Settings</button>
+    </div>
+  </div>
+  <?php include __DIR__ . '/includes/account_settings.php'; ?>
+</section>
 <?php endif; ?>
 
 <?php if (is_admin()): ?>
@@ -179,13 +197,10 @@ if (!current_user()) {
 
 <section class="tab-panel" id="panel-settings" aria-label="Website Settings">
   <div class="page-heading">
-    <div><h1>Website Settings</h1><p>Store identity, receipt message, and outgoing mail configuration.</p></div>
+    <div><h1>Website Settings</h1><p>Outgoing mail configuration and your account.</p></div>
   </div>
   <div class="card backup-card">
     <div class="settings-grid">
-      <label class="field">Store Name<input type="text" id="setting-store_name"></label>
-      <label class="field">Store Address<input type="text" id="setting-store_address"></label>
-      <label class="field span-2">Receipt Footer<input type="text" id="setting-receipt_footer"></label>
       <label class="field">SMTP Host<input type="text" id="setting-smtp_host" placeholder="smtp.example.com"></label>
       <label class="field">SMTP Port<input type="number" id="setting-smtp_port" value="587"></label>
       <label class="field">Security
@@ -204,6 +219,7 @@ if (!current_user()) {
       </div>
     </div>
   </div>
+  <?php include __DIR__ . '/includes/account_settings.php'; ?>
 </section>
 
 <section class="tab-panel" id="panel-backup" aria-label="Backup and Restore">

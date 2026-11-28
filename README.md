@@ -17,7 +17,7 @@ A lightweight, responsive point-of-sale system built with native PHP 8.1+, MySQL
 2. Make sure `config/` and `uploads/` are writable by the web server.
 3. Open `https://your-domain/install.php` in a browser.
 4. Enter database credentials and create the administrator account.
-5. Log in at `login.php`, then open **Backup & Restore → Store & SMTP Settings** to set the store name, receipt footer, and SMTP details.
+5. Log in at `login.php`. Clients can open **Settings** to set the store name, address, and receipt footer. The administrator uses **Website Settings** for SMTP details. Both roles can update their full name, email, and password under **Account Settings**.
 6. For security, delete `install.php` after installation (the installer disables itself once `config/database.local.php` exists).
 
 If you need to change database credentials later, edit `config/database.local.php` or set `POS_DB_HOST`, `POS_DB_NAME`, `POS_DB_USER`, and `POS_DB_PASS` environment variables.
@@ -28,7 +28,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 
 - **Public hero page:** the root URL (`index.php`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages.
 - **Open signup with email activation:** clients register themselves, then activate a 24-hour link sent through SMTP; accounts stay inactive until confirmed.
-- **Multi-user, one app:** One Website Administrator manages the Admin Dashboard (overview, users, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. API endpoints enforce these roles server-side and allow only one administrator.
+- **Multi-user, one app:** One Website Administrator manages the Admin Dashboard (overview, users, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, Sales History, and Settings (store details and account details). API endpoints enforce these roles server-side and allow only one administrator.
 - **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), desktop/mobile browser camera scanner with camera selection (phones open the back camera by default), cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts.
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
 - **Sales History:** Today/Yesterday/Week/Month/Year/Custom/All filters, total sales, receipt count, average transaction, Chart.js daily sales chart, transaction list, reprintable receipts, item-level Excel export respecting filters.

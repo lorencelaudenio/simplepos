@@ -46,6 +46,7 @@ try {
     <button class="nav-tab active" data-tab="cashier" type="button"><i class="bi bi-cash-coin"></i> Cashier</button>
     <button class="nav-tab" data-tab="inventory" type="button"><i class="bi bi-box-seam"></i> Inventory</button>
     <button class="nav-tab" data-tab="sales" type="button"><i class="bi bi-clock-history"></i> Sales History</button>
+    <button class="nav-tab" data-tab="settings" type="button"><i class="bi bi-sliders2"></i> Settings</button>
   <?php endif; ?>
 </nav>
 <main class="app-main">

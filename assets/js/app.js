@@ -417,7 +417,7 @@
   function activateTab(name) {
     const valid = config.isAdmin
       ? ['dashboard', 'users', 'settings', 'backup']
-      : ['cashier', 'inventory', 'sales'];
+      : ['cashier', 'inventory', 'sales', 'settings'];
     if (valid.indexOf(name) === -1) name = valid[0];
     document.querySelectorAll('.nav-tab').forEach(function (button) {
       button.classList.toggle('active', button.dataset.tab === name);

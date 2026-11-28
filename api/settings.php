@@ -6,21 +6,23 @@ require_once __DIR__ . '/../includes/api_bootstrap.php';
 $action = $_GET['action'] ?? '';
 
 api_route(function () use ($action) {
-    require_admin();
-
-    $keys = [
-        'store_name', 'store_address', 'receipt_footer',
+    $storeKeys = ['store_name', 'store_address', 'receipt_footer'];
+    $smtpKeys = [
         'smtp_host', 'smtp_port', 'smtp_secure', 'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_from_name',
     ];
+    $isAdmin = is_admin();
+    $allowedKeys = $isAdmin ? $smtpKeys : $storeKeys;
 
-    $publicSettings = static function () use ($keys): array {
+    $publicSettings = static function () use ($allowedKeys, $isAdmin): array {
         $settings = [];
-        foreach ($keys as $key) {
+        foreach ($allowedKeys as $key) {
             $settings[$key] = get_setting($key);
         }
-        // Never expose the stored SMTP password to the browser.
-        $settings['smtp_pass_configured'] = $settings['smtp_pass'] !== '';
-        $settings['smtp_pass'] = '';
+        if ($isAdmin) {
+            // Never expose the stored SMTP password to the browser.
+            $settings['smtp_pass_configured'] = $settings['smtp_pass'] !== '';
+            $settings['smtp_pass'] = '';
+        }
         return $settings;
     };
 
@@ -31,26 +33,54 @@ api_route(function () use ($action) {
     if ($action === 'save') {
         $body = request_body();
         $values = [];
-        foreach ($keys as $key) {
-            $values[$key] = sval($body, $key);
+        foreach ($allowedKeys as $key) {
+            if (array_key_exists($key, $body)) {
+                $values[$key] = sval($body, $key);
+            }
+        }
+        if ($values === []) {
+            fail('No settings were provided.');
         }
 
-        if ($values['store_name'] === '' || mb_strlen($values['store_name']) > 150) {
+        if (array_key_exists('store_name', $values)
+            && ($values['store_name'] === '' || mb_strlen($values['store_name']) > 150)
+        ) {
             fail('Store name is required (150 characters maximum).');
         }
-        if (!ctype_digit($values['smtp_port']) || (int)$values['smtp_port'] < 1 || (int)$values['smtp_port'] > 65535) {
-            fail('Enter a valid SMTP port.');
+        if (array_key_exists('store_address', $values) && mb_strlen($values['store_address']) > 255) {
+            fail('Store address is too long (255 characters maximum).');
         }
-        if (!in_array($values['smtp_secure'], ['tls', 'ssl', 'none'], true)) {
-            fail('Invalid SMTP security option.');
+        if (array_key_exists('receipt_footer', $values) && mb_strlen($values['receipt_footer']) > 255) {
+            fail('Receipt footer is too long (255 characters maximum).');
         }
-        if (mb_strlen($values['smtp_host']) > 200 || mb_strlen($values['smtp_user']) > 200 || mb_strlen($values['smtp_from']) > 200) {
-            fail('SMTP fields are too long.');
-        }
+        if ($isAdmin) {
+            if (array_key_exists('smtp_port', $values)
+                && (!ctype_digit($values['smtp_port']) || (int)$values['smtp_port'] < 1 || (int)$values['smtp_port'] > 65535)
+            ) {
+                fail('Enter a valid SMTP port.');
+            }
+            if (array_key_exists('smtp_secure', $values)
+                && !in_array($values['smtp_secure'], ['tls', 'ssl', 'none'], true)
+            ) {
+                fail('Invalid SMTP security option.');
+            }
+            if (array_key_exists('smtp_host', $values) && mb_strlen($values['smtp_host']) > 200) {
+                fail('SMTP host is too long.');
+            }
+            if (array_key_exists('smtp_user', $values) && mb_strlen($values['smtp_user']) > 200) {
+                fail('SMTP username is too long.');
+            }
+            if (array_key_exists('smtp_from', $values) && mb_strlen($values['smtp_from']) > 200) {
+                fail('From email is too long.');
+            }
+            if (array_key_exists('smtp_from_name', $values) && mb_strlen($values['smtp_from_name']) > 150) {
+                fail('From name is too long.');
+            }
 
-        // A blank password field means "keep the current password".
-        if ($values['smtp_pass'] === '') {
-            unset($values['smtp_pass']);
+            // A blank password field means "keep the current password".
+            if (array_key_exists('smtp_pass', $values) && $values['smtp_pass'] === '') {
+                unset($values['smtp_pass']);
+            }
         }
 
         $pdo = db();
@@ -77,6 +107,7 @@ api_route(function () use ($action) {
     }
 
     if ($action === 'test_email') {
+        require_admin();
         $email = sval(request_body(), 'email');
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             fail('Enter a valid email address.');
