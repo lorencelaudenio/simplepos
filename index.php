@@ -134,7 +134,7 @@ if (!current_user()) {
 
 <section class="tab-panel" id="panel-settings" aria-label="Settings">
   <div class="page-heading">
-    <div><h1>Settings</h1><p>Manage store receipt details and your account.</p></div>
+    <div><h1>Settings</h1><p>Manage store receipt details, your account, and your sales backup.</p></div>
   </div>
   <div class="card backup-card">
     <h2 class="card-title"><i class="bi bi-shop"></i> Store Settings</h2>
@@ -148,6 +148,19 @@ if (!current_user()) {
     </div>
   </div>
   <?php include __DIR__ . '/includes/account_settings.php'; ?>
+  <div class="backup-grid" style="margin-top:18px">
+    <div class="card backup-card">
+      <h2 class="card-title"><i class="bi bi-cloud-download"></i> My Backup</h2>
+      <p class="muted small">Download a backup of only your sales and sale items. Shared products, stock, users, and settings are not included.</p>
+      <button class="btn btn-primary btn-block" id="client-backup-download-btn" type="button" style="margin-top:12px"><i class="bi bi-download"></i> Download My Backup</button>
+    </div>
+    <div class="card backup-card">
+      <h2 class="card-title"><i class="bi bi-cloud-upload"></i> My Restore</h2>
+      <p class="muted small">Upload a client backup to replace only your sales and sale items. A safety backup of your current sales is created first.</p>
+      <label class="field" style="margin-top:12px">Backup File<input type="file" id="client-restore-file" accept=".json,application/json"></label>
+      <button class="btn btn-danger btn-block" id="client-restore-btn" type="button" style="margin-top:12px"><i class="bi bi-exclamation-octagon"></i> Restore My Sales</button>
+    </div>
+  </div>
 </section>
 <?php endif; ?>
 

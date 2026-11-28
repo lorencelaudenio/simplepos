@@ -35,6 +35,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
 - **Sales History:** Today/Yesterday/Week/Month/Year/Custom/All filters, total sales, receipt count, average transaction, Chart.js daily sales chart, transaction list, reprintable receipts, item-level Excel export respecting filters.
 - **Backup & Restore:** timestamped SQL download, SMTP email backup (PHPMailer when installed, built-in SMTP client otherwise), validated `.sql` upload, confirmation dialog, automatic safety backup before restore, admin-only access.
+- **Client sales backup:** clients can download or restore only their own sales and sale items from **Settings**; shared products, stock, users, and settings are never included.
 - **Security:** PHP sessions, `password_hash()`/`password_verify()`, PDO prepared statements, CSRF tokens on all writes, server-side validation, escaped output, file upload checks, role enforcement, and web access denied to `config/`, `includes/`, `uploads/`, and `vendor/`.
 
 ## Client signup and email activation
@@ -48,6 +49,10 @@ Registration is open, but new accounts cannot use the POS until their email is c
 5. If the email is lost, they can request a fresh link from `resend` (one request per minute).
 
 Changing an email address under **Account Settings** also requires a confirmation link sent to the new address; the new email is marked unverified until that link is opened. Changing an existing email requires SMTP to be configured first. Public signups always create Client accounts, never Website Administrators. Administrators can also create accounts with an email address from **Users**; those addresses are stored as verified. If the activation email cannot be sent, the pending account is removed automatically. Only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
+
+## Client sales backup and restore
+
+Clients can download a `.json` backup of only their own sales and sale items from **Settings**, then restore it later from the same tab. Restore validates the file, replaces only rows linked to the signed-in account inside a transaction, and saves a safety backup of the current sales first. Products, stock movements, users, and store/SMTP settings are never included or changed.
 
 ## Optional: PHPMailer
 
