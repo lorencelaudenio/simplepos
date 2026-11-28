@@ -130,6 +130,14 @@ api_route(function () use ($action) {
             error_log('POS restore failed: ' . $ex->getMessage());
             fail('Restore failed. Your automatic safety backup is available as ' . $autoName . '.', 500);
         }
+
+        $adminCount = (int)$pdo->query(
+            'SELECT COUNT(*) FROM users WHERE role = "admin" AND status = "active"'
+        )->fetchColumn();
+        if ($adminCount !== 1) {
+            fail('Restore cancelled: the backup must contain exactly one active website administrator. Your automatic safety backup is available as ' . $autoName . '.', 400);
+        }
+
         @unlink($path);
         unset($_SESSION['restore_backup']);
         json_ok(['safety_backup' => $autoName], 'Database restored successfully. A safety backup was saved before the restore.');

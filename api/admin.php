@@ -78,6 +78,25 @@ api_route(function () use ($action) {
             fail('Password must be at least 8 characters, or leave it blank to keep the current one.');
         }
 
+        $current = null;
+        if ($id > 0) {
+            $currentStmt = $pdo->prepare('SELECT role FROM users WHERE id = ? LIMIT 1');
+            $currentStmt->execute([$id]);
+            $current = $currentStmt->fetch() ?: null;
+            if ($current === null) {
+                fail('User not found.', 404);
+            }
+        }
+
+        $adminCount = (int)$pdo->query('SELECT COUNT(*) FROM users WHERE role = "admin"')->fetchColumn();
+        $isCurrentAdmin = $current !== null && $current['role'] === 'admin';
+        if ($storedRole === 'admin' && !$isCurrentAdmin && $adminCount >= 1) {
+            fail('Only one website administrator is allowed.');
+        }
+        if ($isCurrentAdmin && ($storedRole !== 'admin' || $status !== 'active') && $adminCount <= 1) {
+            fail('The website administrator cannot be demoted or disabled.');
+        }
+
         $check = $pdo->prepare(
             'SELECT id FROM users WHERE username = ?' . ($id > 0 ? ' AND id <> ?' : '')
         );

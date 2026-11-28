@@ -51,6 +51,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach (pos_sql_parse($schema) as $statement) {
                     $pdo->exec($statement);
                 }
+                $adminCount = (int)$pdo->query('SELECT COUNT(*) FROM users WHERE role = "admin"')->fetchColumn();
+                if ($adminCount > 0) {
+                    $existingAdmin = $pdo->prepare(
+                        'SELECT id FROM users WHERE username = ? AND role = "admin" LIMIT 1'
+                    );
+                    $existingAdmin->execute([$adminUser]);
+                    if (!$existingAdmin->fetchColumn()) {
+                        throw new RuntimeException('An administrator already exists. Only one website administrator is allowed.');
+                    }
+                }
+
                 $hash = password_hash($adminPass, PASSWORD_DEFAULT);
                 // Upsert so a retried installation does not fail on an existing admin username.
                 $stmt = $pdo->prepare(

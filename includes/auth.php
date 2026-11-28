@@ -27,7 +27,34 @@ function current_user(): ?array
     if (empty($_SESSION['user_id'])) {
         return null;
     }
-    if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
+
+    $id = (int)$_SESSION['user_id'];
+
+    // Refresh from the database so role/status changes take effect immediately.
+    if (function_exists('db')) {
+        try {
+            $stmt = db()->prepare(
+                'SELECT id, username, full_name, role FROM users WHERE id = ? AND status = "active" LIMIT 1'
+            );
+            $stmt->execute([$id]);
+            $row = $stmt->fetch();
+            if (!$row) {
+                logout_user();
+                return null;
+            }
+            $_SESSION['user'] = [
+                'id' => (int)$row['id'],
+                'username' => (string)$row['username'],
+                'full_name' => (string)$row['full_name'],
+                'role' => (string)$row['role'],
+            ];
+            return $_SESSION['user'];
+        } catch (Throwable $ex) {
+            // Fall back to the cached session user if the database is unavailable.
+        }
+    }
+
+    if (isset($_SESSION['user']) && is_array($_SESSION['user']) && (int)($_SESSION['user']['id'] ?? 0) === $id) {
         return $_SESSION['user'];
     }
     return null;

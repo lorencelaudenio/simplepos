@@ -28,7 +28,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 
 - **Public hero page:** the root URL (`index.php`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages.
 - **Open signup with email activation:** clients register themselves, then activate a 24-hour link sent through SMTP; accounts stay inactive until confirmed.
-- **Multi-user, one app:** Website Administrators see an Admin Dashboard (overview, users, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. API endpoints enforce these roles server-side.
+- **Multi-user, one app:** One Website Administrator manages the Admin Dashboard (overview, users, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. API endpoints enforce these roles server-side and allow only one administrator.
 - **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), desktop/mobile browser camera scanner with camera selection (phones open the back camera by default), cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts.
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
 - **Sales History:** Today/Yesterday/Week/Month/Year/Custom/All filters, total sales, receipt count, average transaction, Chart.js daily sales chart, transaction list, reprintable receipts, item-level Excel export respecting filters.
@@ -45,7 +45,7 @@ Registration is open, but new accounts cannot use the POS until their email is a
 4. The cashier opens the link in `activate.php`; the account becomes active and they can sign in.
 5. If the email is lost, they can request a fresh link from `resend.php` (one request per minute).
 
-Public signups always create Client accounts, never Website Administrators. If the activation email cannot be sent, the pending account is removed automatically. Admins can still enable/disable or delete accounts from **Users**.
+Public signups always create Client accounts, never Website Administrators. If the activation email cannot be sent, the pending account is removed automatically. Admins can still enable/disable or delete client accounts from **Users**, but only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
 
 ## Optional: PHPMailer
 

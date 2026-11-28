@@ -62,18 +62,21 @@
   function openUserModal(user) {
     user = user || {};
     const editing = !!user.id;
+    const isAdminUser = editing && user.role === 'admin';
+    const roleOptions = isAdminUser
+      ? '<option value="admin" selected>Website Admin</option>'
+      : '<option value="client" selected>Client (POS user)</option>';
+    const statusOptions = isAdminUser
+      ? '<option value="active" selected>Active</option>'
+      : '<option value="active"' + (user.status !== 'inactive' ? ' selected' : '') + '>Active</option>'
+        + '<option value="inactive"' + (user.status === 'inactive' ? ' selected' : '') + '>Inactive</option>';
     const body = '<input type="hidden" id="u-id" value="' + esc(user.id || '') + '">'
       + '<div class="form-grid">'
       + '<label class="field">Username *<input id="u-username" type="text" maxlength="100" value="' + esc(user.username || '') + '" autocomplete="off"></label>'
       + '<label class="field">Full Name *<input id="u-fullname" type="text" maxlength="150" value="' + esc(user.full_name || '') + '"></label>'
-      + '<label class="field">Role *<select id="u-role">'
-      + '<option value="client"' + (user.role === 'cashier' || user.role === 'client' || !editing ? ' selected' : '') + '>Client (POS user)</option>'
-      + '<option value="admin"' + (user.role === 'admin' ? ' selected' : '') + '>Website Admin</option>'
-      + '</select></label>'
-      + '<label class="field">Status *<select id="u-status">'
-      + '<option value="active"' + (user.status !== 'inactive' ? ' selected' : '') + '>Active</option>'
-      + '<option value="inactive"' + (user.status === 'inactive' ? ' selected' : '') + '>Inactive</option>'
-      + '</select></label>'
+      + '<label class="field">Role *<select id="u-role">' + roleOptions + '</select>'
+      + '<span class="hint">Only one website administrator is allowed.</span></label>'
+      + '<label class="field">Status *<select id="u-status">' + statusOptions + '</select></label>'
       + '<label class="field span-2">Password ' + (editing ? '<span class="hint">(leave blank to keep current)</span>' : '*')
       + '<input id="u-password" type="password" minlength="8" autocomplete="new-password"></label>'
       + '</div>';
