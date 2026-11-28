@@ -141,8 +141,8 @@ if (!current_user()) {
     <div class="settings-grid">
       <label class="field">Store Name<input type="text" id="setting-store_name"><span class="muted small">Shown on your receipts and logged-in POS.</span></label>
       <label class="field">Store Address<input type="text" id="setting-store_address"></label>
-      <label class="field">TIN ID<input type="text" id="setting-tin_id" maxlength="100" placeholder="e.g. 123-456-789"></label>
-      <label class="field">Contact Number<input type="text" id="setting-contact_number" maxlength="100" placeholder="e.g. 09xx xxx xxxx"></label>
+      <label class="field">TIN ID (optional)<input type="text" id="setting-tin_id" maxlength="100" placeholder="e.g. 123-456-789"></label>
+      <label class="field">Contact Number (optional)<input type="text" id="setting-contact_number" maxlength="100" placeholder="e.g. 09xx xxx xxxx"></label>
       <label class="field span-2">Receipt Footer<input type="text" id="setting-receipt_footer"></label>
     </div>
     <div class="row-between" style="margin-top:14px;gap:12px;flex-wrap:wrap">
