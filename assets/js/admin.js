@@ -127,7 +127,7 @@
   window.Users = { init: initUsers, onShow: loadUsers };
 
   /* ---------- Settings and account ---------- */
-  const settingKeys = ['store_name', 'store_address', 'receipt_footer', 'smtp_host', 'smtp_port', 'smtp_secure',
+  const settingKeys = ['website_name', 'store_name', 'store_address', 'receipt_footer', 'smtp_host', 'smtp_port', 'smtp_secure',
     'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_from_name'];
 
   async function loadSettings() {

@@ -10,6 +10,8 @@ if (current_user()) {
     exit;
 }
 
+$websiteName = website_name();
+
 $token = trim((string)($_GET['token'] ?? ''));
 $activated = false;
 $emailChanged = false;
@@ -35,13 +37,13 @@ if ($token === '') {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Activate account - POS</title>
+  <title>Activate account - <?= e($websiteName) ?></title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body class="login-page">
   <main class="card login-card">
-    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></div>
+    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($websiteName) ?></span></div>
     <h1>Account activation</h1>
     <p>Confirm your email to finish setting up your client account.</p>
     <?php if ($activated): ?>

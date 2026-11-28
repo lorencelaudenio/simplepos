@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS settings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO settings (setting_key, setting_value) VALUES
+    ('website_name', 'Simple Online POS'),
     ('store_name', 'My Store'),
     ('store_address', ''),
     ('receipt_footer', 'Thank you for shopping with us!'),

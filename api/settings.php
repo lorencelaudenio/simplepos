@@ -11,12 +11,12 @@ api_route(function () use ($action) {
         'smtp_host', 'smtp_port', 'smtp_secure', 'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_from_name',
     ];
     $isAdmin = is_admin();
-    $allowedKeys = $isAdmin ? $smtpKeys : $storeKeys;
+    $allowedKeys = $isAdmin ? array_merge(['website_name'], $smtpKeys) : $storeKeys;
 
     $publicSettings = static function () use ($allowedKeys, $isAdmin): array {
         $settings = [];
         foreach ($allowedKeys as $key) {
-            $settings[$key] = get_setting($key);
+            $settings[$key] = $key === 'website_name' ? website_name() : get_setting($key);
         }
         if ($isAdmin) {
             // Never expose the stored SMTP password to the browser.
@@ -42,6 +42,11 @@ api_route(function () use ($action) {
             fail('No settings were provided.');
         }
 
+        if (array_key_exists('website_name', $values)
+            && ($values['website_name'] === '' || mb_strlen($values['website_name']) > 150)
+        ) {
+            fail('Website name is required (150 characters maximum).');
+        }
         if (array_key_exists('store_name', $values)
             && ($values['store_name'] === '' || mb_strlen($values['store_name']) > 150)
         ) {
@@ -121,12 +126,12 @@ api_route(function () use ($action) {
         if (!smtp_configured()) {
             fail('SMTP is not configured. Save your SMTP settings first.');
         }
-        $store = get_setting('store_name', 'Simple Online POS');
+        $website = website_name();
         try {
             $result = send_pos_email(
                 $email,
-                $store . ' email test',
-                "This is a test email from " . $store . ".\n\nIf you received this, your SMTP settings are working."
+                $website . ' email test',
+                "This is a test email from " . $website . ".\n\nIf you received this, your SMTP settings are working."
             );
         } catch (ApiException $ex) {
             throw $ex;

@@ -10,6 +10,7 @@ if (current_user()) {
     exit;
 }
 
+$websiteName = website_name();
 $error = '';
 $success = false;
 $email = '';
@@ -45,13 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Resend activation - POS</title>
+  <title>Resend activation - <?= e($websiteName) ?></title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body class="login-page">
   <main class="card login-card">
-    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></div>
+    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($websiteName) ?></span></div>
     <h1>Resend activation email</h1>
     <p>Enter the email address you used to register. A fresh 24-hour link will be sent.</p>
     <?php if ($error !== ''): ?><div class="login-error"><?= e($error) ?></div><?php endif; ?>

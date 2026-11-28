@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /** Public landing page shown at the root when no user is logged in. */
-$heroStore = get_setting('store_name', 'Simple Online POS');
+$heroName = website_name();
 ?>
 <!doctype html>
 <html lang="en">
@@ -9,14 +9,14 @@ $heroStore = get_setting('store_name', 'Simple Online POS');
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#15803d">
-  <meta name="description" content="Simple Online POS - cashier, inventory, sales history, and secure backups in one lightweight web app.">
-  <title><?= e($heroStore) ?> - Point of Sale</title>
+  <meta name="description" content="<?= e($heroName) ?> - cashier, inventory, sales history, and secure backups in one lightweight web app.">
+  <title><?= e($heroName) ?> - Point of Sale</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body class="hero-page">
   <header class="hero-nav">
-    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($heroStore) ?></span></div>
+    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($heroName) ?></span></div>
     <nav class="hero-nav-links" aria-label="Landing navigation">
       <a href="#features">Features</a>
       <a class="btn btn-sm" href="login"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
@@ -106,8 +106,8 @@ $heroStore = get_setting('store_name', 'Simple Online POS');
   </main>
 
   <footer class="hero-footer">
-    <span><?= e($heroStore) ?></span>
-    <span>Simple Online POS &middot; Native PHP + MySQL</span>
+    <span><?= e($heroName) ?></span>
+    <span>Native PHP + MySQL</span>
   </footer>
 </body>
 </html>

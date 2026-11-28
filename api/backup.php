@@ -39,8 +39,8 @@ api_route(function () use ($action) {
         try {
             $result = send_backup_email(
                 $email,
-                'POS Database Backup - ' . date('Y-m-d H:i:s'),
-                "Attached is the latest database backup for " . get_setting('store_name', 'your store') . ".\nGenerated: " . date('Y-m-d H:i:s') . "\n\nKeep this file in a safe place.",
+                website_name() . ' Database Backup - ' . date('Y-m-d H:i:s'),
+                "Attached is the latest database backup for " . website_name() . ".\nGenerated: " . date('Y-m-d H:i:s') . "\n\nKeep this file in a safe place.",
                 $filename,
                 $sql
             );

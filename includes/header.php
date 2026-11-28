@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
-$storeName = get_setting('store_name', 'My Store');
 $navUser = current_user() ?? ['full_name' => '', 'username' => '', 'role' => 'cashier'];
+$brandName = is_admin() ? website_name() : get_setting('store_name', 'My Store');
 $navRole = role_label((string)$navUser['role']);
 $navLowStock = 0;
 try {
@@ -17,13 +17,13 @@ try {
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#15803d">
   <meta name="referrer" content="same-origin">
-  <title><?= e($storeName) ?> - POS</title>
+  <title><?= e($brandName) ?> - POS</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body>
 <header class="app-header">
-  <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($storeName) ?></span></div>
+  <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($brandName) ?></span></div>
   <div class="header-spacer"></div>
   <?php if (!is_admin() && $navLowStock > 0): ?>
     <button class="btn btn-sm" id="low-stock-pill" title="Low stock products" type="button"><i class="bi bi-exclamation-triangle"></i> <span id="low-stock-pill-count"><?= (int)$navLowStock ?></span> low stock</button>

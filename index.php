@@ -139,7 +139,7 @@ if (!current_user()) {
   <div class="card backup-card">
     <h2 class="card-title"><i class="bi bi-shop"></i> Store Settings</h2>
     <div class="settings-grid">
-      <label class="field">Store Name<input type="text" id="setting-store_name"></label>
+      <label class="field">Store Name<input type="text" id="setting-store_name"><span class="muted small">Shown on your receipts and logged-in POS.</span></label>
       <label class="field">Store Address<input type="text" id="setting-store_address"></label>
       <label class="field span-2">Receipt Footer<input type="text" id="setting-receipt_footer"></label>
     </div>
@@ -212,6 +212,7 @@ if (!current_user()) {
   </div>
   <div class="card backup-card">
     <div class="settings-grid">
+      <label class="field">Website Name<input type="text" id="setting-website_name" placeholder="Simple Online POS"><span class="muted small">Shown to visitors and on account emails.</span></label>
       <label class="field">SMTP Host<input type="text" id="setting-smtp_host" placeholder="smtp.example.com"></label>
       <label class="field">SMTP Port<input type="number" id="setting-smtp_port" value="587"></label>
       <label class="field">Security

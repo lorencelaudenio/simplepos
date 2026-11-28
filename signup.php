@@ -10,6 +10,7 @@ if (current_user()) {
     exit;
 }
 
+$websiteName = website_name();
 $error = '';
 $success = false;
 $values = ['username' => '', 'full_name' => '', 'email' => ''];
@@ -71,13 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Create account - POS</title>
+  <title>Create account - <?= e($websiteName) ?></title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body class="login-page">
   <main class="card login-card">
-    <a class="brand" href="index" aria-label="Simple Online POS home"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></a>
+    <a class="brand" href="index" aria-label="<?= e($websiteName) ?> home"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($websiteName) ?></span></a>
     <h1>Create a client account</h1>
     <p>Register below, then activate your account using the link we email to you.</p>
     <?php if ($error !== ''): ?><div class="login-error"><?= e($error) ?></div><?php endif; ?>

@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $adminPass = (string)($_POST['admin_password'] ?? '');
         $adminName = trim((string)($_POST['admin_name'] ?? 'Administrator'));
         $storeName = trim((string)($_POST['store_name'] ?? 'My Store'));
+        $websiteName = trim((string)($_POST['website_name'] ?? 'Simple Online POS'));
 
         if (!preg_match('/^[A-Za-z0-9_]+$/', $dbName)) {
             $error = 'Database name may only contain letters, numbers, and underscores.';
@@ -36,6 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Administrator password must be at least 8 characters.';
         } elseif ($storeName === '' || strlen($storeName) > 150) {
             $error = 'Enter a store name.';
+        } elseif ($websiteName === '' || strlen($websiteName) > 150) {
+            $error = 'Enter a website name.';
         } elseif (!is_writable(__DIR__ . '/config')) {
             $error = 'The config directory is not writable. Set it to 775 before installing.';
         } else {
@@ -88,6 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$adminUser, $hash, $fullName, $hash, $fullName]);
                 $stmt = $pdo->prepare('UPDATE settings SET setting_value = ? WHERE setting_key = "store_name"');
                 $stmt->execute([$storeName]);
+                $stmt = $pdo->prepare('UPDATE settings SET setting_value = ? WHERE setting_key = "website_name"');
+                $stmt->execute([$websiteName]);
 
                 $contents = "<?php\n"
                     . 'define(\'DB_HOST\', ' . var_export($host, true) . ");\n"
@@ -136,6 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <label class="field">Database Name<input type="text" name="db_name" value="<?= e(DB_NAME) ?>" required></label>
           <label class="field">Database User<input type="text" name="db_user" value="<?= e(DB_USER) ?>" required></label>
           <label class="field">Database Password<input type="password" name="db_pass" autocomplete="new-password"></label>
+          <label class="field">Website Name<input type="text" name="website_name" value="Simple Online POS" required></label>
           <label class="field">Store Name<input type="text" name="store_name" value="My Store" required></label>
           <label class="field">Admin Full Name<input type="text" name="admin_name" value="Administrator"></label>
           <label class="field">Admin Username<input type="text" name="admin_username" required autocomplete="username"></label>

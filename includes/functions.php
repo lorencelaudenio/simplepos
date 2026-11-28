@@ -178,6 +178,13 @@ function clear_setting_cache(): void
     $GLOBALS['pos_setting_cache'] = [];
 }
 
+/** Public website brand, controlled only by the administrator. */
+function website_name(): string
+{
+    $name = trim(get_setting('website_name', ''));
+    return $name !== '' ? $name : 'Simple Online POS';
+}
+
 function set_setting(string $key, string $value): void
 {
     $stmt = db()->prepare(

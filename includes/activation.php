@@ -205,20 +205,20 @@ function activation_url(string $token): string
 /** @param array<string,mixed> $activation */
 function activation_send_email(array $activation): array
 {
-    $store = get_setting('store_name', 'Simple Online POS');
+    $website = website_name();
     $name = (string)($activation['full_name'] ?? 'there');
     $link = activation_url((string)$activation['token']);
     $emailChange = ($activation['purpose'] ?? '') === 'email_change';
     $subject = $emailChange
-        ? 'Confirm your new email address - ' . $store
-        : 'Activate your ' . $store . ' account';
+        ? 'Confirm your new email address - ' . $website
+        : 'Activate your ' . $website . ' account';
     $body = "Hello " . $name . ",\n\n"
         . ($emailChange
             ? "Confirm the new email address on your account by opening this link:\n\n"
             : "Your client account has been created. Confirm your email below; an administrator will enable the account after confirmation:\n\n")
         . $link . "\n\n"
         . "This link expires in 24 hours. If you did not request this, you can ignore this email.\n\n"
-        . "— " . $store;
+        . "— " . $website;
     return send_pos_email((string)$activation['email'], $subject, $body);
 }
 
