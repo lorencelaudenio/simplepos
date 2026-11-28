@@ -253,7 +253,6 @@ class SmtpMailer
 
     private function buildMessage(): string
     {
-        $boundary = 'POSBOUND' . bin2hex(random_bytes(12));
         $headers = [
             'From: ' . $this->encodedHeader($this->fromName) . ' <' . $this->from . '>',
             'To: <' . $this->to . '>',
@@ -261,15 +260,25 @@ class SmtpMailer
             'Date: ' . gmdate('D, d M Y H:i:s') . ' +0000',
             'Message-ID: <' . bin2hex(random_bytes(16)) . '@' . $this->ehloHost() . '>',
             'MIME-Version: 1.0',
-            'Content-Type: multipart/mixed; boundary="' . $boundary . '"',
             'X-Mailer: Simple Online POS',
         ];
 
-        // Encoding the body avoids 8-bit transport issues with UTF-8 text.
+        // Plain messages stay single-part so basic webmail and temp-mail parsers
+        // can show the body without traversing a MIME boundary.
+        if ($this->attachments === []) {
+            $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+            $headers[] = 'Content-Transfer-Encoding: quoted-printable';
+            return implode("\n", $headers) . "\n\n" . quoted_printable_encode($this->body);
+        }
+
+        $boundary = 'POSBOUND' . bin2hex(random_bytes(12));
+        $headers[] = 'Content-Type: multipart/mixed; boundary="' . $boundary . '"';
+
+        // Encoding the text part avoids 8-bit transport issues with UTF-8 text.
         $body = '--' . $boundary . "\n"
             . "Content-Type: text/plain; charset=UTF-8\n"
-            . "Content-Transfer-Encoding: base64\n\n"
-            . chunk_split(base64_encode($this->body), 76, "\n");
+            . "Content-Transfer-Encoding: quoted-printable\n\n"
+            . quoted_printable_encode($this->body) . "\n";
         foreach ($this->attachments as $attachment) {
             [$asciiName, $encodedName] = $this->attachmentName($attachment['name']);
             $mime = preg_replace('/[^A-Za-z0-9.+\-\/]/', '', $attachment['mime'] ?? '');
