@@ -44,6 +44,7 @@ a { color: var(--green); text-decoration: none; }
   z-index: 20;
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -.02em; }
+a.brand { color: inherit; }
 .brand-mark {
   width: 36px; height: 36px; border-radius: 11px;
   background: var(--green); color: #fff; display: grid; place-items: center;

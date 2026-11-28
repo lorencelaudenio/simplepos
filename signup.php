@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="login-page">
   <main class="card login-card">
-    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></div>
+    <a class="brand" href="index.php" aria-label="Simple Online POS home"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></a>
     <h1>Create a client account</h1>
     <p>Register below, then activate your account using the link we email to you.</p>
     <?php if ($error !== ''): ?><div class="login-error"><?= e($error) ?></div><?php endif; ?>

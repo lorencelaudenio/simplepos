@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="login-page">
   <main class="card login-card">
-    <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></div>
+    <a class="brand" href="index.php" aria-label="Simple Online POS home"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></a>
     <h1>Welcome back</h1>
     <p>Sign in to manage your store.</p>
     <?php if ($notice !== ''): ?><div class="login-error" style="background:var(--green-soft);color:var(--green-dark)"><?= e($notice) ?></div><?php endif; ?>
