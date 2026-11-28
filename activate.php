@@ -12,14 +12,16 @@ if (current_user()) {
 
 $token = trim((string)($_GET['token'] ?? ''));
 $activated = false;
+$emailChanged = false;
 $error = '';
 
 if ($token === '') {
     $error = 'No activation link was provided.';
 } else {
     try {
-        activation_activate(db(), $token);
+        $result = activation_activate(db(), $token);
         $activated = true;
+        $emailChanged = ($result['purpose'] ?? '') === 'email_change';
     } catch (ApiException $ex) {
         $error = $ex->getMessage();
     } catch (Throwable $ex) {
@@ -43,8 +45,13 @@ if ($token === '') {
     <h1>Account activation</h1>
     <p>Confirm your email to finish setting up your client account.</p>
     <?php if ($activated): ?>
-      <div class="login-success"><i class="bi bi-check-circle-fill"></i> Your account is active. You can sign in now.</div>
-      <a class="btn btn-primary btn-block" href="login.php?activated=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
+      <?php if ($emailChanged): ?>
+        <div class="login-success"><i class="bi bi-check-circle-fill"></i> Your email address has been updated.</div>
+        <a class="btn btn-primary btn-block" href="login.php?email_changed=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
+      <?php else: ?>
+        <div class="login-success"><i class="bi bi-check-circle-fill"></i> Email confirmed. An administrator will enable your account before you can sign in.</div>
+        <a class="btn btn-primary btn-block" href="login.php?activated=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
+      <?php endif; ?>
     <?php else: ?>
       <div class="login-error"><?= e($error) ?></div>
       <a class="btn btn-block" href="resend.php"><i class="bi bi-envelope-arrow-up"></i> Request a new activation link</a>

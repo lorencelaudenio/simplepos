@@ -4,6 +4,12 @@ DirectoryIndex index.php index.html
 # Disable directory listings if mod_autoindex is active.
 Options -Indexes
 
+# Never serve dotfiles or repository metadata (.git, .env, etc.).
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule (^|/)\. - [F,L]
+</IfModule>
+
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"

@@ -126,16 +126,24 @@ api_route(function () use ($action) {
 
         try {
             pos_restore($pdo, $validation['statements']);
+            $adminRows = (int)$pdo->query('SELECT COUNT(*) FROM users WHERE role = "admin"')->fetchColumn();
+            $activeAdminRows = (int)$pdo->query(
+                'SELECT COUNT(*) FROM users WHERE role = "admin" AND status = "active"'
+            )->fetchColumn();
+            if ($adminRows !== 1 || $activeAdminRows !== 1) {
+                throw new RuntimeException('Restored database does not contain exactly one active administrator.');
+            }
         } catch (Throwable $ex) {
             error_log('POS restore failed: ' . $ex->getMessage());
-            fail('Restore failed. Your automatic safety backup is available as ' . $autoName . '.', 500);
-        }
-
-        $adminCount = (int)$pdo->query(
-            'SELECT COUNT(*) FROM users WHERE role = "admin" AND status = "active"'
-        )->fetchColumn();
-        if ($adminCount !== 1) {
-            fail('Restore cancelled: the backup must contain exactly one active website administrator. Your automatic safety backup is available as ' . $autoName . '.', 400);
+            $safety = pos_validate_backup($currentDump);
+            if ($safety['ok']) {
+                try {
+                    pos_restore($pdo, $safety['statements']);
+                } catch (Throwable $restoreError) {
+                    error_log('POS safety restore failed: ' . $restoreError->getMessage());
+                }
+            }
+            fail('Restore failed and the previous database was restored. A safety backup is available as ' . $autoName . '.', 500);
         }
 
         @unlink($path);

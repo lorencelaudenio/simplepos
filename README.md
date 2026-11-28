@@ -13,21 +13,21 @@ A lightweight, responsive point-of-sale system built with native PHP 8.1+, MySQL
 
 ## Installation
 
-1. Upload all files to your web root (or a `/pos` subfolder).
-2. Make sure `config/` and `uploads/` are writable by the web server.
+1. Upload all files to your web root (or a `/pos` subfolder). Do not upload `.git/`.
+2. Make sure `config/` and `uploads/` are writable, and that `config/install.allowed` exists (the installer removes it when finished).
 3. Open `https://your-domain/install.php` in a browser.
 4. Enter database credentials and create the administrator account.
 5. Log in at `login.php`. Open the account name menu in the header for **Settings** and **Log out**. Clients can set the store name, address, and receipt footer there; the administrator configures SMTP. Both roles can update their full name, email, and password under **Account Settings**.
-6. For security, delete `install.php` after installation (the installer disables itself once `config/database.local.php` exists).
+6. Delete `install.php` after installation. The installer is also blocked once `config/install.allowed` is gone, env DB settings are present, or the target database already has users.
 
-If you need to change database credentials later, edit `config/database.local.php` or set `POS_DB_HOST`, `POS_DB_NAME`, `POS_DB_USER`, and `POS_DB_PASS` environment variables.
+If you need to change database credentials later, edit `config/database.local.php` or set `POS_DB_HOST`, `POS_DB_NAME`, `POS_DB_USER`, and `POS_DB_PASS` environment variables. Set `POS_APP_URL` (for example `https://pos.example.com`) or `POS_ALLOWED_HOSTS` so activation links never depend on an untrusted `Host` header.
 
 Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`) so receipts and reports use local time.
 
 ## Features
 
 - **Public hero page:** the root URL (`index.php`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages.
-- **Open signup with email activation:** clients register themselves, then activate a 24-hour link sent through SMTP; accounts stay inactive until confirmed.
+- **Signup with email confirmation and admin approval:** clients register themselves, confirm a 24-hour email link, then an administrator enables the account from **Users** before it can access the POS.
 - **Multi-user, one app:** One Website Administrator manages the Admin Dashboard (overview, users, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. Settings and Log out live in the header account menu for both roles. API endpoints enforce these roles server-side and allow only one administrator.
 - **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), desktop/mobile browser camera scanner with camera selection (phones open the back camera by default), cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts.
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
@@ -37,15 +37,15 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 
 ## Client signup and email activation
 
-Registration is open, but new accounts cannot use the POS until their email is activated:
+Registration is open, but new accounts cannot use the POS until their email is confirmed and an administrator approves them:
 
 1. Configure SMTP under **Website Settings** (or using `smtp_host`, `smtp_port`, `smtp_secure`, `smtp_user`, `smtp_pass`, `smtp_from`).
 2. A cashier opens `signup.php` from the login/hero page and submits name, username, email, and password.
-3. The account is created as an inactive **Client** and a 24-hour activation link is emailed to them.
-4. The cashier opens the link in `activate.php`; the account becomes active and they can sign in.
+3. The account is created as an inactive **Client** and a 24-hour confirmation link is emailed to them.
+4. The cashier opens the link in `activate.php`; the email is marked confirmed, but the account stays inactive until an administrator enables it from **Users**.
 5. If the email is lost, they can request a fresh link from `resend.php` (one request per minute).
 
-Public signups always create Client accounts, never Website Administrators. If the activation email cannot be sent, the pending account is removed automatically. Admins can still enable/disable or delete client accounts from **Users**, but only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
+Changing an email address under **Account Settings** also requires a confirmation link sent to the new address; the new email is marked unverified until that link is opened. Changing an existing email requires SMTP to be configured first. Public signups always create Client accounts, never Website Administrators. If the activation email cannot be sent, the pending account is removed automatically. Only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
 
 ## Optional: PHPMailer
 

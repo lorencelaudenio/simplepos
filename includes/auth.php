@@ -50,7 +50,9 @@ function current_user(): ?array
             ];
             return $_SESSION['user'];
         } catch (Throwable $ex) {
-            // Fall back to the cached session user if the database is unavailable.
+            // Fail closed: never authorize from a cached role if the DB cannot confirm it.
+            logout_user();
+            return null;
         }
     }
 

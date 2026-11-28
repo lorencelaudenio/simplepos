@@ -6,12 +6,16 @@ require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/backup_lib.php';
 
 $localConfig = __DIR__ . '/config/database.local.php';
-$installed = is_file($localConfig);
+$setupToken = __DIR__ . '/config/install.allowed';
+$envConfigured = getenv('POS_DB_HOST') !== false
+    || getenv('POS_DB_NAME') !== false
+    || getenv('POS_DB_USER') !== false;
+$installed = is_file($localConfig) || $envConfigured || !is_file($setupToken);
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($installed) {
-        $error = 'This installation is already configured. Delete config/database.local.php to reinstall.';
+        $error = 'Installation is unavailable. Remove config/install.allowed only for a fresh installation.';
     } elseif (!verify_csrf($_POST['csrf_token'] ?? '')) {
         $error = 'Invalid security token. Please refresh the page.';
     } else {
@@ -44,6 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $pdo->exec('CREATE DATABASE IF NOT EXISTS `' . $dbName . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
                 $pdo->exec('USE `' . $dbName . '`');
+                $usersTable = $pdo->query("SHOW TABLES LIKE 'users'")->fetchColumn();
+                if ($usersTable !== false) {
+                    $existingUsers = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+                    if ($existingUsers > 0) {
+                        throw new RuntimeException('This database already contains users. Installation is disabled.');
+                    }
+                }
                 $schema = file_get_contents(__DIR__ . '/database.sql');
                 if ($schema === false) {
                     throw new RuntimeException('database.sql is missing.');
@@ -86,11 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (file_put_contents($localConfig, $contents, LOCK_EX) === false) {
                     throw new RuntimeException('Unable to write config/database.local.php.');
                 }
+                @chmod($localConfig, 0600);
+                @unlink($setupToken);
                 header('Location: login.php?installed=1');
                 exit;
             } catch (Throwable $ex) {
                 error_log('POS install error: ' . $ex->getMessage());
-                $error = 'Installation failed: ' . $ex->getMessage();
+                $error = 'Installation failed. Check the server error log for details.';
             }
         }
     }
