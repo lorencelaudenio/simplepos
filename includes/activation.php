@@ -222,6 +222,22 @@ function activation_send_email(array $activation): array
     return send_pos_email((string)$activation['email'], $subject, $body);
 }
 
+/** Build the public sign-in URL using only activation.php helpers. */
+function activation_login_url(): string
+{
+    $configured = trim((string)(getenv('POS_APP_URL') ?: ''));
+    if ($configured !== '') {
+        return rtrim($configured, '/') . '/login';
+    }
+    $script = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? '/index'));
+    $base = dirname($script);
+    if (basename($base) === 'api') {
+        $base = dirname($base);
+    }
+    $base = rtrim($base === '.' ? '' : $base, '/');
+    return activation_base_url() . $base . '/login';
+}
+
 /** Send a short welcome note after a signup email has been confirmed. */
 function activation_send_welcome_email(array $activation): void
 {
@@ -235,7 +251,7 @@ function activation_send_welcome_email(array $activation): void
     $body = "Hello " . ($name !== '' ? $name : 'there') . ",\n\n"
         . "Your email has been confirmed and your " . $website . " account is now active.\n\n"
         . ($username !== '' ? "Username: " . $username . "\n" : '')
-        . "Sign in: " . site_url('login') . "\n\n"
+        . "Sign in: " . activation_login_url() . "\n\n"
         . "You can now use the cashier, inventory, and sales tools.\n\n"
         . "— " . $website;
     send_pos_email($email, 'Welcome to ' . $website . ' - your account is active', $body);
