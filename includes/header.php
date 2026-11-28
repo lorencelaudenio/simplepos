@@ -19,7 +19,7 @@ try {
   <meta name="referrer" content="same-origin">
   <title><?= e($storeName) ?> - POS</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="assets/css/app.css?v=3">
+  <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
 <body>
 <header class="app-header">
@@ -30,23 +30,29 @@ try {
   <?php else: ?>
     <button class="btn btn-sm hidden" id="low-stock-pill" title="Low stock products" type="button"><i class="bi bi-exclamation-triangle"></i> <span id="low-stock-pill-count">0</span> low stock</button>
   <?php endif; ?>
-  <div class="header-user">
-    <strong><?= e($navUser['full_name'] !== '' ? $navUser['full_name'] : $navUser['username']) ?></strong>
-    <span><?= e($navRole) ?></span>
+  <div class="user-menu" id="user-menu">
+    <button class="user-menu-btn" id="user-menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">
+      <span class="header-user">
+        <strong><?= e($navUser['full_name'] !== '' ? $navUser['full_name'] : $navUser['username']) ?></strong>
+        <span><?= e($navRole) ?></span>
+      </span>
+      <i class="bi bi-chevron-down"></i>
+    </button>
+    <div class="user-menu-dropdown hidden" id="user-menu-dropdown" role="menu">
+      <button class="user-menu-item" data-tab="settings" type="button" role="menuitem"><i class="bi bi-sliders2"></i> Settings</button>
+      <a class="user-menu-item" href="logout.php" role="menuitem"><i class="bi bi-box-arrow-right"></i> Log out</a>
+    </div>
   </div>
-  <a class="icon-btn" href="logout.php" title="Log out" aria-label="Log out"><i class="bi bi-box-arrow-right"></i></a>
 </header>
 <nav class="app-nav" id="main-nav" aria-label="Main navigation">
   <?php if (is_admin()): ?>
     <button class="nav-tab active" data-tab="dashboard" type="button"><i class="bi bi-speedometer2"></i> Admin Dashboard</button>
     <button class="nav-tab" data-tab="users" type="button"><i class="bi bi-people"></i> Users</button>
-    <button class="nav-tab" data-tab="settings" type="button"><i class="bi bi-sliders2"></i> Website Settings</button>
     <button class="nav-tab" data-tab="backup" type="button"><i class="bi bi-database-shield"></i> Backup &amp; Restore</button>
   <?php else: ?>
     <button class="nav-tab active" data-tab="cashier" type="button"><i class="bi bi-cash-coin"></i> Cashier</button>
     <button class="nav-tab" data-tab="inventory" type="button"><i class="bi bi-box-seam"></i> Inventory</button>
     <button class="nav-tab" data-tab="sales" type="button"><i class="bi bi-clock-history"></i> Sales History</button>
-    <button class="nav-tab" data-tab="settings" type="button"><i class="bi bi-sliders2"></i> Settings</button>
   <?php endif; ?>
 </nav>
 <main class="app-main">

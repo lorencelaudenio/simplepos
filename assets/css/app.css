@@ -53,6 +53,28 @@ a.brand { color: inherit; }
 .header-spacer { flex: 1; }
 .header-user { color: var(--muted); font-size: 13px; text-align: right; }
 .header-user strong { display: block; color: var(--ink); font-size: 14px; }
+.user-menu { position: relative; }
+.user-menu-btn {
+  display: flex; align-items: center; gap: 8px;
+  border: 0; background: transparent; color: inherit;
+  padding: 6px 8px; border-radius: 10px;
+}
+.user-menu-btn:hover { background: var(--bg); }
+.user-menu-btn > i { color: var(--muted); font-size: 12px; }
+.user-menu-dropdown {
+  position: absolute; right: 0; top: calc(100% + 8px);
+  min-width: 180px; padding: 6px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 11px; box-shadow: var(--shadow); z-index: 30;
+}
+.user-menu-item {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--ink);
+  font-size: 13px; text-align: left; cursor: pointer;
+}
+.user-menu-item:hover { background: var(--green-softer); color: var(--green-dark); }
+.user-menu-item.active { color: var(--green); font-weight: 600; }
 .icon-btn, .btn {
   border: 1px solid var(--line);
   background: var(--card);

@@ -419,8 +419,8 @@
       ? ['dashboard', 'users', 'settings', 'backup']
       : ['cashier', 'inventory', 'sales', 'settings'];
     if (valid.indexOf(name) === -1) name = valid[0];
-    document.querySelectorAll('.nav-tab').forEach(function (button) {
-      button.classList.toggle('active', button.dataset.tab === name);
+    document.querySelectorAll('#main-nav .nav-tab, .user-menu-item[data-tab]').forEach(function (control) {
+      control.classList.toggle('active', control.dataset.tab === name);
     });
     document.querySelectorAll('.tab-panel').forEach(function (panel) {
       panel.classList.toggle('active', panel.id === 'panel-' + name);
@@ -444,6 +444,34 @@
     document.querySelectorAll('#main-nav .nav-tab').forEach(function (button) {
       button.addEventListener('click', function () { activateTab(button.dataset.tab); });
     });
+
+    const userMenu = document.getElementById('user-menu');
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userMenuDropdown = document.getElementById('user-menu-dropdown');
+    if (userMenu && userMenuBtn && userMenuDropdown) {
+      const closeUserMenu = function () {
+        userMenuDropdown.classList.add('hidden');
+        userMenuBtn.setAttribute('aria-expanded', 'false');
+      };
+      userMenuBtn.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const open = userMenuDropdown.classList.toggle('hidden') === false;
+        userMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      userMenuDropdown.querySelectorAll('[data-tab]').forEach(function (item) {
+        item.addEventListener('click', function () {
+          activateTab(item.dataset.tab);
+          closeUserMenu();
+        });
+      });
+      document.addEventListener('click', function (event) {
+        if (!userMenu.contains(event.target)) closeUserMenu();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeUserMenu();
+      });
+    }
+
     document.getElementById('modal-close').addEventListener('click', closeModal);
     document.getElementById('modal-backdrop').addEventListener('click', closeModal);
     document.getElementById('confirm-cancel').addEventListener('click', function () { resolveConfirm(false); });
