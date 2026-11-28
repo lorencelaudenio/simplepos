@@ -65,6 +65,7 @@ if ($token === '') {
       <a class="btn btn-block" href="resend"><i class="bi bi-envelope-arrow-up"></i> Request a new activation link</a>
       <p class="auth-link" style="margin-top:18px;margin-bottom:0">Back to <a href="login">sign in</a></p>
     <?php endif; ?>
+    <p class="auth-link" style="margin-top:12px;margin-bottom:0;font-size:12px"><?php include __DIR__ . '/includes/legal_links.php'; ?></p>
   </main>
 </body>
 </html>

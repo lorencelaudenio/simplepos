@@ -131,6 +131,9 @@ $heroSchema = [
   <footer class="hero-footer">
     <span><?= e($heroName) ?></span>
     <span>Native PHP + MySQL</span>
+    <nav aria-label="Legal links" style="display:flex;gap:14px;flex-wrap:wrap">
+      <?php include __DIR__ . '/legal_links.php'; ?>
+    </nav>
   </footer>
 </body>
 </html>

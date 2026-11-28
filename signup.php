@@ -109,6 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-person-plus"></i> Create Account</button>
       </form>
       <p class="auth-link" style="margin-top:18px;margin-bottom:0">Already have an account? <a href="login">Sign in</a></p>
+      <p class="auth-link" style="margin-top:12px;margin-bottom:0;font-size:12px">By signing up you agree to our <?php include __DIR__ . '/includes/legal_links.php'; ?>.</p>
     <?php endif; ?>
   </main>
 </body>

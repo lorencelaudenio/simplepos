@@ -93,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign In</button>
     </form>
     <p class="auth-link" style="margin-top:18px;margin-bottom:0">New here? <a href="signup">Create a client account</a><br><span style="display:inline-block;margin-top:8px">Forgot your password? <a href="forgot">Reset it</a><br>Need to activate? <a href="resend">Resend activation email</a></span></p>
+    <p class="auth-link" style="margin-top:12px;margin-bottom:0;font-size:12px"><?php include __DIR__ . '/includes/legal_links.php'; ?></p>
   </main>
 </body>
 </html>

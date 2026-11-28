@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-envelope-arrow-up"></i> Send New Link</button>
     </form>
     <p class="auth-link" style="margin-top:18px;margin-bottom:0">Back to <a href="login">sign in</a></p>
+    <p class="auth-link" style="margin-top:12px;margin-bottom:0;font-size:12px"><?php include __DIR__ . '/includes/legal_links.php'; ?></p>
   </main>
 </body>
 </html>

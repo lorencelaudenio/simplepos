@@ -94,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php else: ?>
       <p class="auth-link" style="margin-bottom:0"><a href="forgot">Request a new reset link</a> · <a href="login">Sign in</a></p>
     <?php endif; ?>
+    <p class="auth-link" style="margin-top:12px;margin-bottom:0;font-size:12px"><?php include __DIR__ . '/includes/legal_links.php'; ?></p>
   </main>
 </body>
 </html>
