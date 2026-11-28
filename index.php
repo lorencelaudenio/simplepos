@@ -138,7 +138,8 @@ if (!current_user()) {
   </div>
   <div class="card backup-card">
     <h2 class="card-title"><i class="bi bi-shop"></i> Store Settings</h2>
-    <div class="settings-grid">
+    <p class="muted small">Store name, address, TIN ID, and contact number appear in the header of printed receipts. Leave optional fields blank to hide them.</p>
+    <div class="settings-grid" style="margin-top:12px">
       <label class="field">Store Name<input type="text" id="setting-store_name"><span class="muted small">Shown on your receipts and logged-in POS.</span></label>
       <label class="field">Store Address<input type="text" id="setting-store_address"></label>
       <label class="field">TIN ID (optional)<input type="text" id="setting-tin_id" maxlength="100" placeholder="e.g. 123-456-789"></label>
