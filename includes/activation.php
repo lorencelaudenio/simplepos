@@ -222,6 +222,25 @@ function activation_send_email(array $activation): array
     return send_pos_email((string)$activation['email'], $subject, $body);
 }
 
+/** Send a short welcome note after a signup email has been confirmed. */
+function activation_send_welcome_email(array $activation): void
+{
+    $website = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
+    $email = (string)($activation['email'] ?? '');
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return;
+    }
+    $name = trim((string)($activation['full_name'] ?? ''));
+    $username = (string)($activation['username'] ?? '');
+    $body = "Hello " . ($name !== '' ? $name : 'there') . ",\n\n"
+        . "Your email has been confirmed and your " . $website . " account is now active.\n\n"
+        . ($username !== '' ? "Username: " . $username . "\n" : '')
+        . "Sign in: " . site_url('login') . "\n\n"
+        . "You can now use the cashier, inventory, and sales tools.\n\n"
+        . "— " . $website;
+    send_pos_email($email, 'Welcome to ' . $website . ' - your account is active', $body);
+}
+
 /**
  * Create a pending client account and its activation token.
  *
@@ -352,6 +371,16 @@ function activation_activate(PDO $pdo, string $token): array
         $delete->execute([activation_token_key($token)]);
 
         $pdo->commit();
+
+        if ($purpose === 'signup') {
+            try {
+                activation_send_welcome_email($activation);
+            } catch (Throwable $ex) {
+                // The account is already active; a mail failure must not undo activation.
+                error_log('POS welcome email error [user ' . $userId . ']: ' . $ex->getMessage());
+            }
+        }
+
         return $activation;
     } catch (Throwable $ex) {
         if ($pdo->inTransaction()) {
