@@ -149,6 +149,8 @@
     return '<div style="text-align:center">'
       + '<div class="store">' + esc(sale.store_name || window.POS.config.storeName) + '</div>'
       + (sale.store_address ? '<div>' + esc(sale.store_address) + '</div>' : '')
+      + (sale.tin_id ? '<div>TIN: ' + esc(sale.tin_id) + '</div>' : '')
+      + (sale.contact_number ? '<div>Contact: ' + esc(sale.contact_number) + '</div>' : '')
       + '<div>RECEIPT</div></div>'
       + '<div class="divider"></div>'
       + '<div>No: ' + esc(sale.receipt_number) + '</div>'

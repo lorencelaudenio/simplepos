@@ -35,6 +35,8 @@ function sale_details(PDO $pdo, int $saleId): ?array
         'item_count' => array_sum(array_column($items, 'quantity')),
         'store_name' => get_setting('store_name', 'My Store'),
         'store_address' => get_setting('store_address', ''),
+        'tin_id' => get_setting('tin_id', ''),
+        'contact_number' => get_setting('contact_number', ''),
         'receipt_footer' => get_setting('receipt_footer', 'Thank you for shopping with us!'),
         'items' => $items,
     ];

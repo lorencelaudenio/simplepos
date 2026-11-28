@@ -82,6 +82,8 @@ INSERT INTO settings (setting_key, setting_value) VALUES
     ('website_name', 'Simple Online POS'),
     ('store_name', 'My Store'),
     ('store_address', ''),
+    ('tin_id', ''),
+    ('contact_number', ''),
     ('receipt_footer', 'Thank you for shopping with us!'),
     ('currency', 'PHP'),
     ('smtp_host', ''),

@@ -6,7 +6,7 @@ require_once __DIR__ . '/../includes/api_bootstrap.php';
 $action = $_GET['action'] ?? '';
 
 api_route(function () use ($action) {
-    $storeKeys = ['store_name', 'store_address', 'receipt_footer'];
+    $storeKeys = ['store_name', 'store_address', 'tin_id', 'contact_number', 'receipt_footer'];
     $smtpKeys = [
         'smtp_host', 'smtp_port', 'smtp_secure', 'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_from_name',
     ];
@@ -58,6 +58,12 @@ api_route(function () use ($action) {
         }
         if (array_key_exists('store_address', $values) && mb_strlen($values['store_address']) > 255) {
             fail('Store address is too long (255 characters maximum).');
+        }
+        if (array_key_exists('tin_id', $values) && mb_strlen($values['tin_id']) > 100) {
+            fail('TIN ID is too long (100 characters maximum).');
+        }
+        if (array_key_exists('contact_number', $values) && mb_strlen($values['contact_number']) > 100) {
+            fail('Contact number is too long (100 characters maximum).');
         }
         if (array_key_exists('receipt_footer', $values) && mb_strlen($values['receipt_footer']) > 255) {
             fail('Receipt footer is too long (255 characters maximum).');
