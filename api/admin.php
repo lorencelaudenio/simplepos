@@ -24,10 +24,28 @@ api_route(function () use ($action) {
     }
 
     if ($action === 'users_list') {
+        $emails = [];
+        $settings = $pdo->query('SELECT setting_key, setting_value FROM settings');
+        foreach ($settings->fetchAll() as $row) {
+            $key = (string)$row['setting_key'];
+            if (!str_starts_with($key, activation_email_prefix())) {
+                continue;
+            }
+            $data = json_decode((string)$row['setting_value'], true);
+            if (is_array($data)) {
+                $emails[(int)substr($key, strlen(activation_email_prefix()))] = (string)($data['email'] ?? '');
+            }
+        }
+
         $stmt = $pdo->query(
             'SELECT id, username, full_name, role, status, created_at FROM users ORDER BY id ASC'
         );
-        json_ok(['users' => $stmt->fetchAll()]);
+        $users = $stmt->fetchAll();
+        foreach ($users as &$user) {
+            $user['email'] = $emails[(int)$user['id']] ?? '';
+        }
+        unset($user);
+        json_ok(['users' => $users]);
     }
 
     if ($action === 'user_save') {
@@ -35,6 +53,7 @@ api_route(function () use ($action) {
         $id = ival($body, 'id');
         $username = sval($body, 'username');
         $fullName = sval($body, 'full_name');
+        $email = sval($body, 'email');
         $role = sval($body, 'role');
         $status = sval($body, 'status', 'active');
         $password = (string)($body['password'] ?? '');
@@ -44,6 +63,12 @@ api_route(function () use ($action) {
         }
         if ($fullName === '' || strlen($fullName) > 150) {
             fail('Full name is required (150 characters maximum).');
+        }
+        if ($email === '' && $id <= 0) {
+            fail('Email address is required.');
+        }
+        if ($email !== '' && (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 150)) {
+            fail('Enter a valid email address (150 characters maximum).');
         }
         if (!in_array($role, ['admin', 'cashier', 'client'], true)) {
             fail('Invalid user role.');
@@ -70,6 +95,10 @@ api_route(function () use ($action) {
             }
         }
 
+        if ($email !== '' && activation_email_conflict($pdo, $email, $id)) {
+            fail('That email address is already registered.', 409);
+        }
+
         $adminCount = (int)$pdo->query('SELECT COUNT(*) FROM users WHERE role = "admin"')->fetchColumn();
         $isCurrentAdmin = $current !== null && $current['role'] === 'admin';
         if ($storedRole === 'admin' && !$isCurrentAdmin && $adminCount >= 1) {
@@ -91,30 +120,67 @@ api_route(function () use ($action) {
             fail('That username is already taken.');
         }
 
-        if ($id > 0) {
-            if ($id === $myId && ($storedRole !== 'admin' || $status !== 'active')) {
-                fail('You cannot change your own role or disable your own account.');
+        if ($id > 0 && $id === $myId && ($storedRole !== 'admin' || $status !== 'active')) {
+            fail('You cannot change your own role or disable your own account.');
+        }
+
+        // Admin-entered addresses are trusted, so they are stored as verified.
+        // A blank value while editing keeps any existing address unchanged.
+        $emailJson = null;
+        if ($email !== '') {
+            $emailJson = json_encode([
+                'email' => $email,
+                'verified' => true,
+                'verified_at' => date('Y-m-d H:i:s'),
+                'source' => 'admin',
+            ], JSON_UNESCAPED_UNICODE);
+            if ($emailJson === false) {
+                fail('Email address could not be saved.');
             }
-            if ($password !== '') {
-                $stmt = $pdo->prepare(
-                    'UPDATE users SET username = ?, full_name = ?, role = ?, status = ?, password = ? WHERE id = ?'
-                );
-                $stmt->execute([$username, $fullName, $storedRole, $status, password_hash($password, PASSWORD_DEFAULT), $id]);
+        }
+
+        $pdo->beginTransaction();
+        try {
+            if ($id > 0) {
+                if ($password !== '') {
+                    $stmt = $pdo->prepare(
+                        'UPDATE users SET username = ?, full_name = ?, role = ?, status = ?, password = ? WHERE id = ?'
+                    );
+                    $stmt->execute([$username, $fullName, $storedRole, $status, password_hash($password, PASSWORD_DEFAULT), $id]);
+                } else {
+                    $stmt = $pdo->prepare(
+                        'UPDATE users SET username = ?, full_name = ?, role = ?, status = ? WHERE id = ?'
+                    );
+                    $stmt->execute([$username, $fullName, $storedRole, $status, $id]);
+                }
+                $message = 'User updated successfully.';
             } else {
                 $stmt = $pdo->prepare(
-                    'UPDATE users SET username = ?, full_name = ?, role = ?, status = ? WHERE id = ?'
+                    'INSERT INTO users (username, password, full_name, role, status) VALUES (?, ?, ?, ?, ?)'
                 );
-                $stmt->execute([$username, $fullName, $storedRole, $status, $id]);
+                $stmt->execute([$username, password_hash($password, PASSWORD_DEFAULT), $fullName, $storedRole, $status]);
+                $id = (int)$pdo->lastInsertId();
+                $message = 'User created successfully.';
             }
-            $message = 'User updated successfully.';
-        } else {
-            $stmt = $pdo->prepare(
-                'INSERT INTO users (username, password, full_name, role, status) VALUES (?, ?, ?, ?, ?)'
-            );
-            $stmt->execute([$username, password_hash($password, PASSWORD_DEFAULT), $fullName, $storedRole, $status]);
-            $id = (int)$pdo->lastInsertId();
-            $message = 'User created successfully.';
+
+            if ($emailJson !== null) {
+                $stmt = $pdo->prepare(
+                    'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+                     ON DUPLICATE KEY UPDATE setting_value = ?'
+                );
+                $stmt->execute([activation_email_key($id), $emailJson, $emailJson]);
+                activation_delete_for_user($pdo, $id);
+            }
+            $pdo->commit();
+        } catch (Throwable $ex) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('POS user save error: ' . $ex->getMessage());
+            fail('User could not be saved. Please try again.', 500);
         }
+
+        clear_setting_cache();
         json_ok(['id' => $id], $message);
     }
 

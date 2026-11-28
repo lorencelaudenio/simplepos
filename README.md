@@ -47,7 +47,7 @@ Registration is open, but new accounts cannot use the POS until their email is c
 4. The cashier opens the link in `activate`; the email is marked confirmed, but the account stays inactive until an administrator enables it from **Users**.
 5. If the email is lost, they can request a fresh link from `resend` (one request per minute).
 
-Changing an email address under **Account Settings** also requires a confirmation link sent to the new address; the new email is marked unverified until that link is opened. Changing an existing email requires SMTP to be configured first. Public signups always create Client accounts, never Website Administrators. If the activation email cannot be sent, the pending account is removed automatically. Only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
+Changing an email address under **Account Settings** also requires a confirmation link sent to the new address; the new email is marked unverified until that link is opened. Changing an existing email requires SMTP to be configured first. Public signups always create Client accounts, never Website Administrators. Administrators can also create accounts with an email address from **Users**; those addresses are stored as verified. If the activation email cannot be sent, the pending account is removed automatically. Only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
 
 ## Optional: PHPMailer
 

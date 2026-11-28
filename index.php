@@ -172,8 +172,8 @@ if (!current_user()) {
   <div class="notice"><i class="bi bi-info-circle"></i> Client accounts use the Cashier, Inventory, Sales History, and Settings tabs. New signups stay inactive until you enable them here. Website administrators only see this admin dashboard.</div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
-      <tbody id="users-list"><tr><td colspan="6" class="center muted">Loading users...</td></tr></tbody>
+      <thead><tr><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody id="users-list"><tr><td colspan="7" class="center muted">Loading users...</td></tr></tbody>
     </table>
   </div>
 </section>

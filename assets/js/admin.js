@@ -28,7 +28,7 @@
       users = data.users || [];
       const body = $('users-list');
       if (!users.length) {
-        body.innerHTML = '<tr><td colspan="6" class="center muted">No users found.</td></tr>';
+        body.innerHTML = '<tr><td colspan="7" class="center muted">No users found.</td></tr>';
         return;
       }
       body.innerHTML = users.map(function (user) {
@@ -36,6 +36,7 @@
         const roleClass = user.role === 'admin' ? 'badge-green' : 'badge-gray';
         const statusClass = user.status === 'active' ? 'badge-green' : 'badge-red';
         return '<tr><td><strong>' + esc(user.username) + '</strong></td><td>' + esc(user.full_name) + '</td>'
+          + '<td>' + esc(user.email || '—') + '</td>'
           + '<td><span class="badge ' + roleClass + '">' + role + '</span></td>'
           + '<td><span class="badge ' + statusClass + '">' + esc(user.status) + '</span></td>'
           + '<td>' + esc(String(user.created_at).replace('T', ' ')) + '</td>'
@@ -62,6 +63,8 @@
       + '<div class="form-grid">'
       + '<label class="field">Username *<input id="u-username" type="text" maxlength="100" value="' + esc(user.username || '') + '" autocomplete="off"></label>'
       + '<label class="field">Full Name *<input id="u-fullname" type="text" maxlength="150" value="' + esc(user.full_name || '') + '"></label>'
+      + '<label class="field span-2">Email Address ' + (editing ? '<span class="hint">(leave blank to keep current)</span>' : '*')
+      + '<input id="u-email" type="email" maxlength="150" value="' + esc(user.email || '') + '" autocomplete="email"></label>'
       + '<label class="field">Role *<select id="u-role">' + roleOptions + '</select>'
       + '<span class="hint">Only one website administrator is allowed.</span></label>'
       + '<label class="field">Status *<select id="u-status">' + statusOptions + '</select></label>'
@@ -77,6 +80,7 @@
         id: Number($('u-id').value || 0),
         username: $('u-username').value.trim(),
         full_name: $('u-fullname').value.trim(),
+        email: $('u-email').value.trim(),
         role: $('u-role').value,
         status: $('u-status').value,
         password: $('u-password').value
