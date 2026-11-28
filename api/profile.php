@@ -42,6 +42,7 @@ api_route(function () use ($action) {
             'username' => (string)$row['username'],
             'full_name' => (string)$row['full_name'],
             'email' => $email,
+            'backup_email' => activation_get_email($pdo, $id, true),
         ];
     };
 

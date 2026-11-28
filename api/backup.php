@@ -47,7 +47,11 @@ api_route(function () use ($action) {
         } catch (Throwable $ex) {
             fail('Email could not be sent: ' . $ex->getMessage(), 502);
         }
-        json_ok(['method' => $result['method'] ?? 'smtp'], 'Backup emailed successfully to ' . $email . '.');
+        error_log('POS backup email accepted for ' . $email . ' via ' . ($result['method'] ?? 'smtp') . '.');
+        json_ok(
+            ['method' => $result['method'] ?? 'smtp'],
+            'Backup email was accepted by the mail server for ' . $email . '. Check your spam folder if it does not arrive.'
+        );
     }
 
     if ($action === 'upload') {

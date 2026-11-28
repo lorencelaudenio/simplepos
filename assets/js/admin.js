@@ -176,11 +176,14 @@
         if (input) input.value = profile[key] == null ? '' : profile[key];
       });
       const clientEmailLabel = $('client-backup-email-label');
+      const clientEmailBtn = $('client-backup-email-btn');
+      const backupEmail = profile.backup_email || '';
       if (clientEmailLabel) {
-        clientEmailLabel.textContent = profile.email
-          ? 'Email on file: ' + profile.email
-          : 'No email on file yet. Add one under Account Settings first.';
+        clientEmailLabel.textContent = backupEmail
+          ? 'Backup email: ' + backupEmail
+          : 'No verified email on file. Add and confirm one under Account Settings first.';
       }
+      if (clientEmailBtn) clientEmailBtn.disabled = backupEmail === '';
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
 

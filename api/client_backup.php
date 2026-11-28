@@ -66,9 +66,10 @@ api_route(function () use ($action) {
             error_log('POS client backup email error: ' . $ex->getMessage());
             fail('Backup email could not be sent: ' . $ex->getMessage(), 502);
         }
+        error_log('POS client backup email accepted for ' . $email . ' via ' . ($result['method'] ?? 'smtp') . '.');
         json_ok(
             ['method' => $result['method'] ?? 'smtp', 'filename' => $filename],
-            'Backup sent to ' . $email . '.'
+            'Backup email was accepted by the mail server for ' . $email . '. Check your spam folder if it does not arrive.'
         );
     }
 
