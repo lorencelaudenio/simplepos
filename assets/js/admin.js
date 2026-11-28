@@ -233,6 +233,9 @@
     onShow: function () {
       loadSettings();
       loadAccount();
+      if (window.Backup && typeof window.Backup.loadClientBackupHistory === 'function') {
+        window.Backup.loadClientBackupHistory();
+      }
     }
   };
 })();

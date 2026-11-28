@@ -15,15 +15,37 @@ api_route(function () use ($action) {
         fail('Your session is invalid. Please log in again.', 401);
     }
     $storeName = get_setting('store_name', 'My Store');
+    $recordHistory = static function (array $entry) use ($pdo, $userId): void {
+        try {
+            client_backup_history_add($pdo, $userId, $entry);
+        } catch (Throwable $ex) {
+            error_log('POS client backup history error: ' . $ex->getMessage());
+        }
+    };
+
+    if ($action === 'history') {
+        json_ok(['history' => client_backup_history_get($pdo, $userId)]);
+    }
 
     if ($action === 'download') {
+        $summary = [];
         try {
-            $json = client_backup_generate($pdo, $userId);
+            $json = client_backup_generate($pdo, $userId, $summary);
         } catch (Throwable $ex) {
             error_log('POS client backup error: ' . $ex->getMessage());
             fail('Your backup could not be generated. Please try again.', 500);
         }
         $filename = client_backup_filename('', $storeName);
+        $recordHistory([
+            'id' => bin2hex(random_bytes(8)),
+            'created_at' => date('Y-m-d H:i:s'),
+            'method' => 'device',
+            'recipient' => '',
+            'filename' => $filename,
+            'size' => strlen($json),
+            'sales' => (int)($summary['sales'] ?? 0),
+            'items' => (int)($summary['items'] ?? 0),
+        ]);
         $asciiFilename = preg_replace('/[^A-Za-z0-9._-]+/', '_', $filename);
         while (ob_get_level() > 0) {
             @ob_end_clean();
@@ -45,8 +67,9 @@ api_route(function () use ($action) {
         if (get_setting('smtp_host') === '') {
             fail('Email delivery is not configured. Ask an administrator to set up SMTP.', 400);
         }
+        $summary = [];
         try {
-            $json = client_backup_generate($pdo, $userId);
+            $json = client_backup_generate($pdo, $userId, $summary);
         } catch (Throwable $ex) {
             error_log('POS client backup error: ' . $ex->getMessage());
             fail('Your backup could not be generated. Please try again.', 500);
@@ -67,6 +90,17 @@ api_route(function () use ($action) {
             fail('Backup email could not be sent: ' . $ex->getMessage(), 502);
         }
         error_log('POS client backup email accepted for ' . $email . ' via ' . ($result['method'] ?? 'smtp') . '.');
+        $recordHistory([
+            'id' => bin2hex(random_bytes(8)),
+            'created_at' => date('Y-m-d H:i:s'),
+            'method' => 'email',
+            'recipient' => $email,
+            'filename' => $filename,
+            'size' => strlen($json),
+            'sales' => (int)($summary['sales'] ?? 0),
+            'items' => (int)($summary['items'] ?? 0),
+            'status' => 'accepted',
+        ]);
         json_ok(
             ['method' => $result['method'] ?? 'smtp', 'filename' => $filename],
             'Backup email was accepted by the mail server for ' . $email . '. Check your spam folder if it does not arrive.'
@@ -149,8 +183,9 @@ api_route(function () use ($action) {
             fail('This backup belongs to a different account.');
         }
 
+        $safetySummary = [];
         try {
-            $safetyJson = client_backup_generate($pdo, $userId);
+            $safetyJson = client_backup_generate($pdo, $userId, $safetySummary);
         } catch (Throwable $ex) {
             error_log('POS client safety backup error: ' . $ex->getMessage());
             fail('Unable to create a safety backup. Restore cancelled.', 500);
@@ -160,6 +195,17 @@ api_route(function () use ($action) {
         if (file_put_contents($safetyPath, $safetyJson, LOCK_EX) === false) {
             fail('Unable to create a safety backup. Restore cancelled.', 500);
         }
+        $recordHistory([
+            'id' => bin2hex(random_bytes(8)),
+            'created_at' => date('Y-m-d H:i:s'),
+            'method' => 'server',
+            'recipient' => '',
+            'filename' => $safetyName,
+            'size' => strlen($safetyJson),
+            'sales' => (int)($safetySummary['sales'] ?? 0),
+            'items' => (int)($safetySummary['items'] ?? 0),
+            'status' => 'safety',
+        ]);
 
         try {
             $result = client_backup_restore($pdo, $validation, $userId);

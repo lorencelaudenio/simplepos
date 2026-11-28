@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/api_bootstrap.php';
 require_once __DIR__ . '/../includes/activation.php';
+require_once __DIR__ . '/../includes/client_backup_lib.php';
 
 $action = $_GET['action'] ?? '';
 
@@ -229,6 +230,7 @@ api_route(function () use ($action) {
         activation_delete_for_user($pdo, $id);
         $stmt = $pdo->prepare('DELETE FROM settings WHERE setting_key = ?');
         $stmt->execute([activation_email_key($id)]);
+        client_backup_history_delete($pdo, $id);
         clear_setting_cache();
         json_ok([], 'User deleted successfully.');
     }

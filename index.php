@@ -163,6 +163,19 @@ if (!current_user()) {
       <button class="btn btn-danger btn-block" id="client-restore-btn" type="button" style="margin-top:12px"><i class="bi bi-exclamation-octagon"></i> Restore My Sales</button>
     </div>
   </div>
+  <div class="card backup-card" style="margin-top:18px">
+    <div class="row-between" style="gap:12px;flex-wrap:wrap">
+      <h2 class="card-title"><i class="bi bi-clock-history"></i> Backup History</h2>
+      <button class="btn btn-sm" id="client-backup-history-refresh" type="button"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+    </div>
+    <p class="muted small">Your most recent 50 backups and automatic safety copies, with where each one was saved.</p>
+    <div class="table-wrap" style="margin-top:12px">
+      <table>
+        <thead><tr><th>Date</th><th>File</th><th>Saved To</th><th>Size</th><th>Sales</th></tr></thead>
+        <tbody id="client-backup-history-list"><tr><td colspan="5" class="center muted">Loading history...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
 </section>
 <?php endif; ?>
 

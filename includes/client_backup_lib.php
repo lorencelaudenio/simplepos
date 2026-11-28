@@ -7,6 +7,7 @@ const CLIENT_BACKUP_FORMAT = 'simple-pos-client-sales';
 const CLIENT_BACKUP_VERSION = 1;
 const CLIENT_BACKUP_MAX_SALES = 10000;
 const CLIENT_BACKUP_MAX_ITEMS = 100000;
+const CLIENT_BACKUP_HISTORY_LIMIT = 50;
 
 function client_backup_store_slug(string $storeName): string
 {
@@ -95,20 +96,90 @@ function client_backup_fetch(PDO $pdo, int $userId): array
     return $sales;
 }
 
-function client_backup_generate(PDO $pdo, int $userId): string
+function client_backup_generate(PDO $pdo, int $userId, ?array &$summary = null): string
 {
+    $sales = client_backup_fetch($pdo, $userId);
+    $itemCount = 0;
+    foreach ($sales as $sale) {
+        $itemCount += count($sale['items']);
+    }
+    $summary = ['sales' => count($sales), 'items' => $itemCount];
+
     $payload = [
         'format' => CLIENT_BACKUP_FORMAT,
         'version' => CLIENT_BACKUP_VERSION,
         'generated_at' => date('Y-m-d H:i:s'),
         'user_id' => $userId,
-        'sales' => client_backup_fetch($pdo, $userId),
+        'sales' => $sales,
     ];
     $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     if ($json === false) {
         throw new RuntimeException('Unable to encode the client backup.');
     }
     return $json;
+}
+
+function client_backup_history_key(int $userId): string
+{
+    return 'client_backup_history_' . $userId;
+}
+
+/** @return array<int,array<string,mixed>> */
+function client_backup_history_get(PDO $pdo, int $userId): array
+{
+    $stmt = $pdo->prepare('SELECT setting_value FROM settings WHERE setting_key = ? LIMIT 1');
+    $stmt->execute([client_backup_history_key($userId)]);
+    $raw = $stmt->fetchColumn();
+    if ($raw === false) {
+        return [];
+    }
+    $history = json_decode((string)$raw, true);
+    if (!is_array($history)) {
+        return [];
+    }
+    return array_values(array_filter($history, 'is_array'));
+}
+
+/** Add a history entry, keeping only the newest CLIENT_BACKUP_HISTORY_LIMIT rows. */
+function client_backup_history_add(PDO $pdo, int $userId, array $entry): void
+{
+    $key = client_backup_history_key($userId);
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('SELECT setting_value FROM settings WHERE setting_key = ? FOR UPDATE');
+        $stmt->execute([$key]);
+        $raw = $stmt->fetchColumn();
+        $history = $raw === false ? [] : json_decode((string)$raw, true);
+        if (!is_array($history)) {
+            $history = [];
+        }
+        array_unshift($history, $entry);
+        $history = array_slice(array_values(array_filter($history, 'is_array')), 0, CLIENT_BACKUP_HISTORY_LIMIT);
+        $json = json_encode($history, JSON_UNESCAPED_UNICODE);
+        if ($json === false) {
+            throw new RuntimeException('Unable to encode the backup history.');
+        }
+        $upsert = $pdo->prepare(
+            'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+             ON DUPLICATE KEY UPDATE setting_value = ?'
+        );
+        $upsert->execute([$key, $json, $json]);
+        $pdo->commit();
+    } catch (Throwable $ex) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $ex;
+    }
+    if (function_exists('clear_setting_cache')) {
+        clear_setting_cache();
+    }
+}
+
+function client_backup_history_delete(PDO $pdo, int $userId): void
+{
+    $stmt = $pdo->prepare('DELETE FROM settings WHERE setting_key = ?');
+    $stmt->execute([client_backup_history_key($userId)]);
 }
 
 /** Strictly validate a client backup. The embedded user_id is never trusted for restore. */
