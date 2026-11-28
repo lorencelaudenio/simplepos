@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/legal_page.php';
 
 $websiteName = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
 
-render_legal_page([
+render_public_page([
     'title' => 'Privacy Policy',
     'description' => 'How ' . $websiteName . ' collects, uses, shares, and protects information when you create an account and run your store.',
     'path' => 'privacy',

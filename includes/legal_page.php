@@ -1,16 +1,22 @@
 <?php
 declare(strict_types=1);
 
-/** Shared shell for public legal pages (privacy policy, terms and conditions). */
-function render_legal_page(array $page): void
+/** Shared shell for public information pages (about, privacy policy, terms and conditions). */
+function render_public_page(array $page): void
 {
     $websiteName = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
-    $title = (string)($page['title'] ?? 'Legal');
+    $title = (string)($page['title'] ?? 'Information');
     $description = (string)($page['description'] ?? '');
     $path = (string)($page['path'] ?? '');
     $updated = (string)($page['updated'] ?? '');
+    $eyebrow = (string)($page['eyebrow'] ?? 'Legal information');
+    $eyebrowIcon = (string)($page['eyebrow_icon'] ?? 'bi-shield-check');
     $toc = is_array($page['toc'] ?? null) ? $page['toc'] : [];
     $contentFile = (string)($page['content'] ?? '');
+    $showRelated = (bool)($page['related'] ?? true);
+    $relatedPrompt = (string)($page['related_prompt'] ?? 'Need the other policy?');
+    $relatedPath = (string)($page['related_path'] ?? ($path === 'privacy' ? 'terms' : 'privacy'));
+    $relatedLabel = (string)($page['related_label'] ?? ($path === 'privacy' ? 'Read the Terms &amp; Conditions' : 'Read the Privacy Policy'));
     $contactEmail = get_setting('smtp_from', '');
     if (!filter_var($contactEmail, FILTER_VALIDATE_EMAIL)) {
         $contactEmail = '';
@@ -39,8 +45,9 @@ function render_legal_page(array $page): void
       <a class="brand" href="index" aria-label="<?= e($websiteName) ?> home">
         <span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($websiteName) ?></span>
       </a>
-      <nav class="legal-nav" aria-label="Legal page navigation">
+      <nav class="legal-nav" aria-label="Public page navigation">
         <a href="index"><i class="bi bi-house-door"></i> Home</a>
+        <a href="about" class="<?= $path === 'about' ? 'active' : '' ?>">About</a>
         <a href="login"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
         <a href="privacy" class="<?= $path === 'privacy' ? 'active' : '' ?>">Privacy Policy</a>
         <a href="terms" class="<?= $path === 'terms' ? 'active' : '' ?>">Terms &amp; Conditions</a>
@@ -50,7 +57,7 @@ function render_legal_page(array $page): void
 
   <main class="legal-main">
     <div class="legal-intro">
-      <span class="legal-eyebrow"><i class="bi bi-shield-check"></i> Legal information</span>
+      <span class="legal-eyebrow"><i class="bi bi-<?= e($eyebrowIcon) ?>"></i> <?= e($eyebrow) ?></span>
       <h1><?= e($title) ?></h1>
       <p><?= e($description) ?></p>
       <?php if ($updated !== ''): ?><p class="legal-meta">Last updated: <?= e($updated) ?></p><?php endif; ?>
@@ -66,7 +73,9 @@ function render_legal_page(array $page): void
               <li><a href="#<?= e((string)($item['id'] ?? '')) ?>"><?= e((string)($item['label'] ?? '')) ?></a></li>
             <?php endforeach; ?>
           </ol>
-          <p class="legal-toc-note">Need the other policy? <a href="<?= $path === 'privacy' ? 'terms' : 'privacy' ?>"><?= $path === 'privacy' ? 'Read the Terms &amp; Conditions' : 'Read the Privacy Policy' ?></a></p>
+          <?php if ($showRelated): ?>
+            <p class="legal-toc-note"><?= e($relatedPrompt) ?> <a href="<?= e($relatedPath) ?>"><?= $relatedLabel ?></a></p>
+          <?php endif; ?>
         </aside>
       <?php endif; ?>
 
@@ -86,6 +95,7 @@ function render_legal_page(array $page): void
     <span><?= e($websiteName) ?></span>
     <nav aria-label="Footer links">
       <a href="index">Home</a>
+      <a href="about">About</a>
       <a href="privacy">Privacy Policy</a>
       <a href="terms">Terms &amp; Conditions</a>
       <a href="login">Sign in</a>

@@ -6,6 +6,7 @@ header('Content-Type: application/xml; charset=utf-8');
 
 $pages = [
     ['path' => '', 'file' => __FILE__, 'changefreq' => 'weekly', 'priority' => '1.0'],
+    ['path' => 'about', 'file' => __DIR__ . '/about.php', 'changefreq' => 'yearly', 'priority' => '0.6'],
     ['path' => 'privacy', 'file' => __DIR__ . '/privacy.php', 'changefreq' => 'yearly', 'priority' => '0.5'],
     ['path' => 'terms', 'file' => __DIR__ . '/terms.php', 'changefreq' => 'yearly', 'priority' => '0.5'],
 ];

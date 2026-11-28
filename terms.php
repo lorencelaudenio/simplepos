@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/legal_page.php';
 
 $websiteName = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
 
-render_legal_page([
+render_public_page([
     'title' => 'Terms & Conditions',
     'description' => 'The rules for using ' . $websiteName . ', including accounts, acceptable use, your store data, backups, and availability.',
     'path' => 'terms',

@@ -41,6 +41,7 @@ $heroSchema = [
   <header class="hero-nav">
     <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($heroName) ?></span></div>
     <nav class="hero-nav-links" aria-label="Landing navigation">
+      <a href="about">About</a>
       <a href="#features">Features</a>
       <a class="btn btn-sm" href="login"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
       <a class="btn btn-sm btn-primary" href="signup"><i class="bi bi-person-plus"></i> Sign up</a>
@@ -130,7 +131,8 @@ $heroSchema = [
 
   <footer class="hero-footer">
     <span><?= e($heroName) ?></span>
-    <nav aria-label="Legal links" style="display:flex;gap:14px;flex-wrap:wrap">
+    <nav aria-label="Site links" style="display:flex;gap:14px;flex-wrap:wrap">
+      <a href="about">About</a>
       <?php include __DIR__ . '/legal_links.php'; ?>
     </nav>
   </footer>

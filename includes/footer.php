@@ -11,6 +11,8 @@ $footerStoreName = $footerUser
 <footer style="border-top:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;background:var(--card);color:var(--muted);font-size:12px">
   <span><?= e(get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS') ?></span>
   <span aria-hidden="true">·</span>
+  <a href="about">About</a>
+  <span aria-hidden="true">·</span>
   <?php include __DIR__ . '/legal_links.php'; ?>
 </footer>
 
