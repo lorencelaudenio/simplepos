@@ -16,7 +16,11 @@ api_route(function () use ($action) {
     $publicSettings = static function () use ($allowedKeys, $isAdmin): array {
         $settings = [];
         foreach ($allowedKeys as $key) {
-            $settings[$key] = $key === 'website_name' ? website_name() : get_setting($key);
+            if ($key === 'website_name') {
+                $settings[$key] = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
+            } else {
+                $settings[$key] = get_setting($key);
+            }
         }
         if ($isAdmin) {
             // Never expose the stored SMTP password to the browser.
@@ -126,7 +130,7 @@ api_route(function () use ($action) {
         if (!smtp_configured()) {
             fail('SMTP is not configured. Save your SMTP settings first.');
         }
-        $website = website_name();
+        $website = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
         try {
             $result = send_pos_email(
                 $email,

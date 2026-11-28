@@ -36,11 +36,12 @@ api_route(function () use ($action) {
         }
         $filename = pos_backup_filename();
         $sql = generate_sql_dump($pdo);
+        $website = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
         try {
             $result = send_backup_email(
                 $email,
-                website_name() . ' Database Backup - ' . date('Y-m-d H:i:s'),
-                "Attached is the latest database backup for " . website_name() . ".\nGenerated: " . date('Y-m-d H:i:s') . "\n\nKeep this file in a safe place.",
+                $website . ' Database Backup - ' . date('Y-m-d H:i:s'),
+                "Attached is the latest database backup for " . $website . ".\nGenerated: " . date('Y-m-d H:i:s') . "\n\nKeep this file in a safe place.",
                 $filename,
                 $sql
             );

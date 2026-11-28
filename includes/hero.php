@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /** Public landing page shown at the root when no user is logged in. */
-$heroName = website_name();
+$heroName = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
 ?>
 <!doctype html>
 <html lang="en">

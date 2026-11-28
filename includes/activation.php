@@ -205,7 +205,7 @@ function activation_url(string $token): string
 /** @param array<string,mixed> $activation */
 function activation_send_email(array $activation): array
 {
-    $website = website_name();
+    $website = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
     $name = (string)($activation['full_name'] ?? 'there');
     $link = activation_url((string)$activation['token']);
     $emailChange = ($activation['purpose'] ?? '') === 'email_change';

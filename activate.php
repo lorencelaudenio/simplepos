@@ -10,7 +10,7 @@ if (current_user()) {
     exit;
 }
 
-$websiteName = website_name();
+$websiteName = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
 
 $token = trim((string)($_GET['token'] ?? ''));
 $activated = false;
