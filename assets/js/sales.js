@@ -74,7 +74,7 @@
       return;
     }
     try {
-      const data = await window.POS.api('api/reports.php?' + query());
+      const data = await window.POS.api('api/reports?' + query());
       $('sum-total').textContent = money(data.summary.total);
       $('sum-receipts').textContent = String(data.summary.receipts);
       $('sum-average').textContent = money(data.summary.average);
@@ -111,7 +111,7 @@
         params.from = $('date-from').value;
         params.to = $('date-to').value;
       }
-      window.POS.downloadFile('api/reports.php?' + window.POS.parseQuery(params))
+      window.POS.downloadFile('api/reports?' + window.POS.parseQuery(params))
         .catch(function (error) { window.POS.toast(error.message, 'error'); });
     });
   }

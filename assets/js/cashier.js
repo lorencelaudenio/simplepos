@@ -77,7 +77,7 @@
     const term = $('product-search').value.trim();
     if (term === '') { renderResults([]); return; }
     try {
-      const data = await window.POS.api('api/products.php?' + window.POS.parseQuery({ action: 'search', q: term }));
+      const data = await window.POS.api('api/products?' + window.POS.parseQuery({ action: 'search', q: term }));
       const exactBarcode = (data.products || []).find(function (product) { return product.barcode === term; });
       if (term.length >= 6 && exactBarcode) {
         // USB scanners usually send Enter; auto-add also handles scanners that do not.
@@ -120,7 +120,7 @@
     const barcode = String(code || '').trim();
     if (!barcode) return;
     try {
-      const data = await window.POS.api('api/products.php?' + window.POS.parseQuery({ action: 'search', q: barcode }));
+      const data = await window.POS.api('api/products?' + window.POS.parseQuery({ action: 'search', q: barcode }));
       const exact = (data.products || []).find(function (product) { return product.barcode === barcode; });
       const product = exact || (data.products || [])[0];
       if (!product) { window.POS.toast('No product found for barcode: ' + barcode, 'error'); return; }
@@ -181,7 +181,7 @@
 
   async function loadReceipt(id) {
     try {
-      const data = await window.POS.api('api/sales.php?' + window.POS.parseQuery({ action: 'get', id: id }));
+      const data = await window.POS.api('api/sales?' + window.POS.parseQuery({ action: 'get', id: id }));
       showReceiptModal(data.sale);
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
@@ -193,8 +193,8 @@
     busy = true;
     $('pay-btn').disabled = true;
     try {
-      const tokenData = await window.POS.api('api/sales.php?action=token');
-      const data = await window.POS.api('api/sales.php?action=checkout', {
+      const tokenData = await window.POS.api('api/sales?action=token');
+      const data = await window.POS.api('api/sales?action=checkout', {
         method: 'POST',
         body: {
           checkout_token: tokenData.checkout_token,

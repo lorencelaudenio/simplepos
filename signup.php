@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/activation.php';
 
 if (current_user()) {
-    header('Location: index.php');
+    header('Location: index');
     exit;
 }
 
@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="login-page">
   <main class="card login-card">
-    <a class="brand" href="index.php" aria-label="Simple Online POS home"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></a>
+    <a class="brand" href="index" aria-label="Simple Online POS home"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></a>
     <h1>Create a client account</h1>
     <p>Register below, then activate your account using the link we email to you.</p>
     <?php if ($error !== ''): ?><div class="login-error"><?= e($error) ?></div><?php endif; ?>
@@ -86,9 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
     <?php if ($success): ?>
       <div class="login-success"><i class="bi bi-envelope-check-fill"></i> Check <strong><?= e($values['email']) ?></strong> for your activation link. The link expires in 24 hours.</div>
-      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Email not arriving? <a href="resend.php">Resend activation</a></p>
+      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Email not arriving? <a href="resend">Resend activation</a></p>
     <?php else: ?>
-      <form method="post" action="signup.php">
+      <form method="post" action="signup">
         <?= csrf_input() ?>
         <label class="field">Full Name<input type="text" name="full_name" value="<?= e($values['full_name']) ?>" autocomplete="name" maxlength="150" required></label>
         <label class="field" style="margin-top:14px">Username<input type="text" name="username" value="<?= e($values['username']) ?>" autocomplete="username" maxlength="100" required></label>
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label class="field" style="margin-top:14px">Confirm Password<input type="password" name="confirm_password" autocomplete="new-password" minlength="8" required></label>
         <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-person-plus"></i> Create Account</button>
       </form>
-      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Already have an account? <a href="login.php">Sign in</a></p>
+      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Already have an account? <a href="login">Sign in</a></p>
     <?php endif; ?>
   </main>
 </body>

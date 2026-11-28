@@ -16,7 +16,7 @@
       const email = $('backup-email').value.trim();
       if (!email) { window.POS.toast('Enter a destination email address.', 'error'); return; }
       try {
-        const data = await window.POS.api('api/backup.php?action=email', { method: 'POST', body: { email: email } });
+        const data = await window.POS.api('api/backup?action=email', { method: 'POST', body: { email: email } });
         window.POS.closeModal();
         window.POS.toast(data.message, 'success');
       } catch (error) { window.POS.toast(error.message, 'error'); }
@@ -30,7 +30,7 @@
     form.append('file', file);
     pendingToken = '';
     try {
-      const data = await window.POS.api('api/backup.php?action=upload', { method: 'POST', body: form });
+      const data = await window.POS.api('api/backup?action=upload', { method: 'POST', body: form });
       pendingToken = data.token;
       const confirmed = await window.POS.confirm(
         'Restore database?',
@@ -39,7 +39,7 @@
         'Restore now'
       );
       if (!confirmed) { pendingToken = ''; return; }
-      const result = await window.POS.api('api/backup.php?action=restore', {
+      const result = await window.POS.api('api/backup?action=restore', {
         method: 'POST',
         body: { token: pendingToken, confirm: true }
       });
@@ -52,7 +52,7 @@
   function init() {
     if (!$('backup-download-btn')) return;
     $('backup-download-btn').addEventListener('click', function () {
-      window.POS.downloadFile('api/backup.php?action=download')
+      window.POS.downloadFile('api/backup?action=download')
         .catch(function (error) { window.POS.toast(error.message, 'error'); });
     });
     $('backup-email-btn').addEventListener('click', openEmailModal);

@@ -40,7 +40,7 @@ try {
     </button>
     <div class="user-menu-dropdown hidden" id="user-menu-dropdown" role="menu">
       <button class="user-menu-item" data-tab="settings" type="button" role="menuitem"><i class="bi bi-sliders2"></i> Settings</button>
-      <a class="user-menu-item" href="logout.php" role="menuitem"><i class="bi bi-box-arrow-right"></i> Log out</a>
+      <a class="user-menu-item" href="logout" role="menuitem"><i class="bi bi-box-arrow-right"></i> Log out</a>
     </div>
   </div>
 </header>

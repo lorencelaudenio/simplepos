@@ -19,8 +19,8 @@ $heroStore = get_setting('store_name', 'Simple Online POS');
     <div class="brand"><span class="brand-mark"><i class="bi bi-shop"></i></span><span><?= e($heroStore) ?></span></div>
     <nav class="hero-nav-links" aria-label="Landing navigation">
       <a href="#features">Features</a>
-      <a class="btn btn-sm" href="login.php"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
-      <a class="btn btn-sm btn-primary" href="signup.php"><i class="bi bi-person-plus"></i> Sign up</a>
+      <a class="btn btn-sm" href="login"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
+      <a class="btn btn-sm btn-primary" href="signup"><i class="bi bi-person-plus"></i> Sign up</a>
     </nav>
   </header>
 
@@ -32,8 +32,8 @@ $heroStore = get_setting('store_name', 'Simple Online POS');
           <h1>Run your counter from one simple dashboard.</h1>
           <p class="hero-lead">Sell faster, track every product, review daily sales, and keep a safe backup of your business — all in one place.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary btn-lg" href="login.php"><i class="bi bi-cash-coin"></i> Open Cashier</a>
-            <a class="btn btn-lg" href="signup.php"><i class="bi bi-person-plus"></i> New here? Sign up</a>
+            <a class="btn btn-primary btn-lg" href="login"><i class="bi bi-cash-coin"></i> Open Cashier</a>
+            <a class="btn btn-lg" href="signup"><i class="bi bi-person-plus"></i> New here? Sign up</a>
           </div>
           <div class="hero-points">
             <span><i class="bi bi-check-circle-fill"></i> No installs for cashiers</span>
@@ -99,8 +99,8 @@ $heroStore = get_setting('store_name', 'Simple Online POS');
         <p>Already set up? Sign in to your dashboard. New cashier? Ask your admin for an invite code.</p>
       </div>
       <div class="hero-actions">
-        <a class="btn btn-lg btn-primary" href="login.php"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
-        <a class="btn btn-lg" href="signup.php"><i class="bi bi-person-plus"></i> Create account</a>
+        <a class="btn btn-lg btn-primary" href="login"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
+        <a class="btn btn-lg" href="signup"><i class="bi bi-person-plus"></i> Create account</a>
       </div>
     </section>
   </main>

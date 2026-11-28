@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 @chmod($localConfig, 0600);
                 @unlink($setupToken);
-                header('Location: login.php?installed=1');
+                header('Location: login?installed=1');
                 exit;
             } catch (Throwable $ex) {
                 error_log('POS install error: ' . $ex->getMessage());
@@ -124,12 +124,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($installed): ?>
       <h1>Already installed</h1>
       <p>The database configuration file already exists. For security, reinstallation is disabled.</p>
-      <a class="btn btn-primary btn-block" href="login.php">Go to Login</a>
+      <a class="btn btn-primary btn-block" href="login">Go to Login</a>
     <?php else: ?>
       <h1>Database Setup</h1>
       <p>Create the database tables and your administrator account.</p>
       <?php if ($error !== ''): ?><div class="login-error"><?= e($error) ?></div><?php endif; ?>
-      <form method="post" action="install.php">
+      <form method="post" action="install">
         <?= csrf_input() ?>
         <div class="form-grid">
           <label class="field">Database Host<input type="text" name="db_host" value="<?= e(DB_HOST) ?>" required></label>

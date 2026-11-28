@@ -22,7 +22,7 @@
   async function loadProducts() {
     try {
       const query = Object.assign({ action: 'list' }, filters());
-      const data = await window.POS.api('api/products.php?' + window.POS.parseQuery(query));
+      const data = await window.POS.api('api/products?' + window.POS.parseQuery(query));
       products = data.products || [];
       renderProducts();
     } catch (error) { window.POS.toast(error.message, 'error'); }
@@ -30,7 +30,7 @@
 
   async function loadLowStock() {
     try {
-      const data = await window.POS.api('api/inventory.php?action=low_stock');
+      const data = await window.POS.api('api/inventory?action=low_stock');
       const count = Number(data.count || 0);
       window.POS.updateLowStock(count);
       const alertBox = $('low-stock-alert');
@@ -131,7 +131,7 @@
           return;
         }
         try {
-          const data = await window.POS.api('api/products.php?action=save', { method: 'POST', body: payload });
+          const data = await window.POS.api('api/products?action=save', { method: 'POST', body: payload });
           window.POS.closeModal();
           window.POS.updateLowStock(data.low_stock_count);
           await refresh();
@@ -141,7 +141,7 @@
     }
     if (!id) { show(null); return; }
     try {
-      const data = await window.POS.api('api/products.php?' + window.POS.parseQuery({ action: 'get', id: id }));
+      const data = await window.POS.api('api/products?' + window.POS.parseQuery({ action: 'get', id: id }));
       show(data.product);
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
@@ -164,7 +164,7 @@
     });
     $('view-movements').addEventListener('click', async function () {
       try {
-        const data = await window.POS.api('api/inventory.php?' + window.POS.parseQuery({ action: 'movements', id: product.id }));
+        const data = await window.POS.api('api/inventory?' + window.POS.parseQuery({ action: 'movements', id: product.id }));
         const list = data.movements || [];
         $('movements-list').innerHTML = list.length
           ? '<div class="table-wrap" style="max-height:180px;overflow:auto"><table><thead><tr><th>Date</th><th>Type</th><th>Change</th><th>New stock</th></tr></thead><tbody>'
@@ -180,7 +180,7 @@
       const qty = Number($('add-qty').value);
       if (!Number.isInteger(qty) || qty <= 0) { window.POS.toast('Enter a positive whole quantity.', 'error'); return; }
       try {
-        const data = await window.POS.api('api/inventory.php?action=add_stock', {
+        const data = await window.POS.api('api/inventory?action=add_stock', {
           method: 'POST',
           body: { id: product.id, quantity: qty, notes: $('add-notes').value.trim() }
         });
@@ -222,7 +222,7 @@
       + '<button class="btn btn-ghost" id="cancel-import" type="button">Cancel</button>';
     window.POS.openModal('Import Products from Excel', body, footer, { wide: true });
     $('download-template').addEventListener('click', function () {
-      window.POS.downloadFile('api/inventory.php?action=template').catch(function (error) { window.POS.toast(error.message, 'error'); });
+      window.POS.downloadFile('api/inventory?action=template').catch(function (error) { window.POS.toast(error.message, 'error'); });
     });
     $('preview-import').addEventListener('click', async function () {
       const file = $('import-file').files[0];
@@ -230,7 +230,7 @@
       const form = new FormData();
       form.append('file', file);
       try {
-        const data = await window.POS.api('api/inventory.php?action=import_preview', { method: 'POST', body: form });
+        const data = await window.POS.api('api/inventory?action=import_preview', { method: 'POST', body: form });
         importToken = data.token;
         importRows = data.rows || [];
         renderImportPreview();
@@ -242,7 +242,7 @@
       if (!importToken) { window.POS.toast('Preview the file before importing.', 'error'); return; }
       if (!(await window.POS.confirm('Import products?', 'Valid rows will be added to inventory. Invalid rows will be skipped.', 'Import'))) return;
       try {
-        const data = await window.POS.api('api/inventory.php?action=import_commit', {
+        const data = await window.POS.api('api/inventory?action=import_commit', {
           method: 'POST',
           body: { token: importToken, overwrite: $('import-overwrite').checked }
         });
@@ -279,7 +279,7 @@
     $('add-product-btn').addEventListener('click', function () { openProductModal(0); });
     $('import-btn').addEventListener('click', openImportModal);
     $('export-inventory-btn').addEventListener('click', function () {
-      window.POS.downloadFile('api/inventory.php?' + window.POS.parseQuery(Object.assign({ action: 'export' }, filters())))
+      window.POS.downloadFile('api/inventory?' + window.POS.parseQuery(Object.assign({ action: 'export' }, filters())))
         .catch(function (error) { window.POS.toast(error.message, 'error'); });
     });
     $('product-grid').addEventListener('click', async function (event) {
@@ -293,7 +293,7 @@
       if (action === 'stock') { openStockModal(product); return; }
       if (action === 'restore') {
         try {
-          const data = await window.POS.api('api/products.php?action=restore', { method: 'POST', body: { id: id } });
+          const data = await window.POS.api('api/products?action=restore', { method: 'POST', body: { id: id } });
           await refresh();
           window.POS.updateLowStock(data.low_stock_count);
           window.POS.toast('Product restored to active inventory.', 'success');
@@ -306,7 +306,7 @@
           : 'Remove "' + product.product_name + '"? Products with sales history are archived automatically.';
         if (!(await window.POS.confirm('Delete product?', message, 'Delete'))) return;
         try {
-          const data = await window.POS.api('api/products.php?action=delete', { method: 'POST', body: { id: id } });
+          const data = await window.POS.api('api/products?action=delete', { method: 'POST', body: { id: id } });
           await refresh();
           window.POS.updateLowStock(data.low_stock_count);
           window.POS.toast(data.message, 'success');

@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/functions.php';
 
 if (current_user()) {
-    header('Location: index.php');
+    header('Location: index');
     exit;
 }
 
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Incorrect username or password.';
             } else {
                 login_user($user);
-                header('Location: index.php');
+                header('Location: index');
                 exit;
             }
         } catch (Throwable $ex) {
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="login-page">
   <main class="card login-card">
-    <a class="brand" href="index.php" aria-label="Simple Online POS home"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></a>
+    <a class="brand" href="index" aria-label="Simple Online POS home"><span class="brand-mark"><i class="bi bi-shop"></i></span><span>Simple Online POS</span></a>
     <h1>Welcome back</h1>
     <p>Sign in to manage your store.</p>
     <?php if ($notice !== ''): ?><div class="login-error" style="background:var(--green-soft);color:var(--green-dark)"><?= e($notice) ?></div><?php endif; ?>
@@ -79,13 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if (!$dbReady): ?>
       <div class="notice"><i class="bi bi-info-circle"></i> Sign-in is temporarily unavailable. Please try again later.</div>
     <?php endif; ?>
-    <form method="post" action="login.php">
+    <form method="post" action="login">
       <?= csrf_input() ?>
       <label class="field">Username<input type="text" name="username" autocomplete="username" required autofocus></label>
       <label class="field" style="margin-top:14px">Password<input type="password" name="password" autocomplete="current-password" required></label>
       <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign In</button>
     </form>
-    <p class="auth-link" style="margin-top:18px;margin-bottom:0">New here? <a href="signup.php">Create a client account</a><br><span style="display:inline-block;margin-top:8px">Need to activate? <a href="resend.php">Resend activation email</a></span></p>
+    <p class="auth-link" style="margin-top:18px;margin-bottom:0">New here? <a href="signup">Create a client account</a><br><span style="display:inline-block;margin-top:8px">Need to activate? <a href="resend">Resend activation email</a></span></p>
   </main>
 </body>
 </html>

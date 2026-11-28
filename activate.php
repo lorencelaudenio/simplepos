@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/activation.php';
 
 if (current_user()) {
-    header('Location: index.php');
+    header('Location: index');
     exit;
 }
 
@@ -47,15 +47,15 @@ if ($token === '') {
     <?php if ($activated): ?>
       <?php if ($emailChanged): ?>
         <div class="login-success"><i class="bi bi-check-circle-fill"></i> Your email address has been updated.</div>
-        <a class="btn btn-primary btn-block" href="login.php?email_changed=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
+        <a class="btn btn-primary btn-block" href="login?email_changed=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
       <?php else: ?>
         <div class="login-success"><i class="bi bi-check-circle-fill"></i> Email confirmed. An administrator will enable your account before you can sign in.</div>
-        <a class="btn btn-primary btn-block" href="login.php?activated=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
+        <a class="btn btn-primary btn-block" href="login?activated=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
       <?php endif; ?>
     <?php else: ?>
       <div class="login-error"><?= e($error) ?></div>
-      <a class="btn btn-block" href="resend.php"><i class="bi bi-envelope-arrow-up"></i> Request a new activation link</a>
-      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Back to <a href="login.php">sign in</a></p>
+      <a class="btn btn-block" href="resend"><i class="bi bi-envelope-arrow-up"></i> Request a new activation link</a>
+      <p class="auth-link" style="margin-top:18px;margin-bottom:0">Back to <a href="login">sign in</a></p>
     <?php endif; ?>
   </main>
 </body>

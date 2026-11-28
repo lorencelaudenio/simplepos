@@ -173,17 +173,17 @@ function activation_url(string $token): string
 {
     $configured = trim((string)(getenv('POS_APP_URL') ?: ''));
     if ($configured !== '') {
-        return rtrim($configured, '/') . '/activate.php?token=' . rawurlencode($token);
+        return rtrim($configured, '/') . '/activate?token=' . rawurlencode($token);
     }
-    $script = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+    $script = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? '/index'));
     $base = dirname($script);
-    // Email confirmations can be triggered from /api/profile.php, so climb out
+    // Email confirmations can be triggered from /api/profile, so climb out
     // of the API directory when deriving the public app base path.
     if (basename($base) === 'api') {
         $base = dirname($base);
     }
     $base = rtrim($base === '.' ? '' : $base, '/');
-    return activation_base_url() . $base . '/activate.php?token=' . rawurlencode($token);
+    return activation_base_url() . $base . '/activate?token=' . rawurlencode($token);
 }
 
 /** @param array<string,mixed> $activation */

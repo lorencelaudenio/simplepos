@@ -12,7 +12,7 @@
   async function loadOverview() {
     if (!$('admin-users')) return;
     try {
-      const data = await window.POS.api('api/admin.php?action=overview');
+      const data = await window.POS.api('api/admin?action=overview');
       const o = data.overview || {};
       $('admin-users').textContent = String(o.users || 0);
       $('admin-clients').textContent = String(o.clients || 0);
@@ -36,7 +36,7 @@
   async function loadUsers() {
     if (!$('users-list')) return;
     try {
-      const data = await window.POS.api('api/admin.php?action=users_list');
+      const data = await window.POS.api('api/admin?action=users_list');
       users = data.users || [];
       const body = $('users-list');
       if (!users.length) {
@@ -94,7 +94,7 @@
         password: $('u-password').value
       };
       try {
-        const data = await window.POS.api('api/admin.php?action=user_save', { method: 'POST', body: payload });
+        const data = await window.POS.api('api/admin?action=user_save', { method: 'POST', body: payload });
         window.POS.closeModal();
         await loadUsers();
         window.POS.toast(data.message, 'success');
@@ -114,7 +114,7 @@
       if (button.dataset.action === 'edit') { openUserModal(user); return; }
       if (button.dataset.action === 'toggle') {
         try {
-          const data = await window.POS.api('api/admin.php?action=user_toggle', { method: 'POST', body: { id: id } });
+          const data = await window.POS.api('api/admin?action=user_toggle', { method: 'POST', body: { id: id } });
           await loadUsers();
           window.POS.toast(data.message, 'success');
         } catch (error) { window.POS.toast(error.message, 'error'); }
@@ -124,7 +124,7 @@
         const ok = await window.POS.confirm('Delete user?', 'Permanently delete "' + user.username + '"? This cannot be undone.', 'Delete');
         if (!ok) return;
         try {
-          const data = await window.POS.api('api/admin.php?action=user_delete', { method: 'POST', body: { id: id } });
+          const data = await window.POS.api('api/admin?action=user_delete', { method: 'POST', body: { id: id } });
           await loadUsers();
           window.POS.toast(data.message, 'success');
         } catch (error) { window.POS.toast(error.message, 'error'); }
@@ -141,7 +141,7 @@
   async function loadSettings() {
     if (!$('settings-save-btn')) return;
     try {
-      const data = await window.POS.api('api/settings.php?action=get');
+      const data = await window.POS.api('api/settings?action=get');
       const values = data.settings || {};
       Object.keys(values).forEach(function (key) {
         const input = $('setting-' + key);
@@ -160,7 +160,7 @@
     });
     if (Object.keys(payload).length === 0) return;
     try {
-      const data = await window.POS.api('api/settings.php?action=save', { method: 'POST', body: payload });
+      const data = await window.POS.api('api/settings?action=save', { method: 'POST', body: payload });
       const saved = data.settings || {};
       Object.keys(saved).forEach(function (key) {
         const input = $('setting-' + key);
@@ -177,7 +177,7 @@
   async function loadAccount() {
     if (!$('account-save-btn')) return;
     try {
-      const data = await window.POS.api('api/profile.php?action=get');
+      const data = await window.POS.api('api/profile?action=get');
       const profile = data.profile || {};
       ['full_name', 'email'].forEach(function (key) {
         const input = $('account-' + key);
@@ -196,7 +196,7 @@
       confirm_password: $('account-confirm_password').value
     };
     try {
-      const data = await window.POS.api('api/profile.php?action=save', { method: 'POST', body: payload });
+      const data = await window.POS.api('api/profile?action=save', { method: 'POST', body: payload });
       ['account-current_password', 'account-new_password', 'account-confirm_password'].forEach(function (id) {
         const input = $(id);
         if (input) input.value = '';
@@ -210,7 +210,7 @@
     const email = input ? input.value.trim() : '';
     if (!email) { window.POS.toast('Enter an email address to test.', 'error'); return; }
     try {
-      const data = await window.POS.api('api/settings.php?action=test_email', {
+      const data = await window.POS.api('api/settings?action=test_email', {
         method: 'POST',
         body: { email: email }
       });

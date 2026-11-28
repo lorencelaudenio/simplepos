@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/activation.php';
 
 if (current_user()) {
-    header('Location: index.php');
+    header('Location: index');
     exit;
 }
 
@@ -58,12 +58,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($success): ?>
       <div class="login-success"><i class="bi bi-envelope-check-fill"></i> A new activation link was sent to <strong><?= e($email) ?></strong>.</div>
     <?php endif; ?>
-    <form method="post" action="resend.php">
+    <form method="post" action="resend">
       <?= csrf_input() ?>
       <label class="field">Email Address<input type="email" name="email" value="<?= e($email) ?>" autocomplete="email" maxlength="150" required></label>
       <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-envelope-arrow-up"></i> Send New Link</button>
     </form>
-    <p class="auth-link" style="margin-top:18px;margin-bottom:0">Back to <a href="login.php">sign in</a></p>
+    <p class="auth-link" style="margin-top:18px;margin-bottom:0">Back to <a href="login">sign in</a></p>
   </main>
 </body>
 </html>

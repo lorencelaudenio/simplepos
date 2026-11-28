@@ -62,7 +62,7 @@ function current_user(): ?array
     return null;
 }
 
-function require_login(string $redirectTo = 'login.php'): array
+function require_login(string $redirectTo = 'login'): array
 {
     $user = current_user();
     if (!$user) {

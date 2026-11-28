@@ -8,6 +8,15 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule (^|/)\. - [F,L]
+
+    # Send old .php URLs to their extensionless equivalents.
+    RewriteCond %{THE_REQUEST} \s/([^\s?]+)\.php[\s?] [NC]
+    RewriteRule ^ /%1 [R=301,L,NE,QSA]
+
+    # Internally map clean URLs back to their PHP files.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.+?)/?$ $1.php [L]
 </IfModule>
 
 <IfModule mod_headers.c>
