@@ -37,7 +37,13 @@ if ($token === '') {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Activate account - <?= e($websiteName) ?></title>
+  <meta name="referrer" content="same-origin">
+  <?php seo_tags([
+      'title' => 'Activate account - ' . $websiteName,
+      'description' => 'Confirm the email address for your ' . $websiteName . ' client account.',
+      'path' => 'activate',
+      'site_name' => $websiteName,
+  ]); ?>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>

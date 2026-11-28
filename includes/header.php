@@ -19,7 +19,13 @@ try {
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#15803d">
   <meta name="referrer" content="same-origin">
-  <title><?= e($brandName) ?> - POS</title>
+  <?php seo_tags([
+      'title' => $brandName . ' - POS',
+      'description' => 'Private point-of-sale dashboard for ' . $brandName . '.',
+      'path' => 'index',
+      'robots' => 'noindex, nofollow',
+      'site_name' => $brandName,
+  ]); ?>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>

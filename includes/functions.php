@@ -39,6 +39,59 @@ function e($value): string
     return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+/**
+ * Build a canonical app URL without trusting an arbitrary Host header.
+ * Set POS_APP_URL (or POS_ALLOWED_HOSTS) when deployed behind a proxy.
+ */
+function site_url(string $path = ''): string
+{
+    $configured = trim((string)(getenv('POS_APP_URL') ?: ''));
+    if ($configured !== '') {
+        $base = rtrim($configured, '/');
+    } else {
+        $serverName = (string)($_SERVER['SERVER_NAME'] ?? 'localhost');
+        $host = $serverName;
+        $allowed = array_values(array_filter(array_map('trim', explode(',', (string)(getenv('POS_ALLOWED_HOSTS') ?: '')))));
+        if ($allowed !== []) {
+            $sent = (string)($_SERVER['HTTP_HOST'] ?? $serverName);
+            $host = in_array($sent, $allowed, true) ? $sent : $allowed[0];
+        }
+        $https = (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off')
+            || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+        $base = ($https ? 'https' : 'http') . '://' . $host;
+        $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+        $directory = $scriptName !== '' ? dirname($scriptName) : '/';
+        if ($directory !== '/' && $directory !== '.') {
+            $base .= rtrim($directory, '/');
+        }
+    }
+    $path = trim($path, '/');
+    return $base . ($path !== '' ? '/' . $path : '/');
+}
+
+/** Output shared SEO, canonical, and social-preview metadata for a page. */
+function seo_tags(array $seo): void
+{
+    $title = (string)($seo['title'] ?? 'Simple Online POS');
+    $description = (string)($seo['description'] ?? 'A lightweight point-of-sale system for small stores.');
+    $robots = (string)($seo['robots'] ?? 'noindex, nofollow');
+    $siteName = (string)($seo['site_name'] ?? $title);
+    $url = site_url((string)($seo['path'] ?? ''));
+
+    echo '  <title>' . e($title) . '</title>' . PHP_EOL;
+    echo '  <meta name="description" content="' . e($description) . '">' . PHP_EOL;
+    echo '  <meta name="robots" content="' . e($robots) . '">' . PHP_EOL;
+    echo '  <link rel="canonical" href="' . e($url) . '">' . PHP_EOL;
+    echo '  <meta property="og:type" content="website">' . PHP_EOL;
+    echo '  <meta property="og:site_name" content="' . e($siteName) . '">' . PHP_EOL;
+    echo '  <meta property="og:title" content="' . e($title) . '">' . PHP_EOL;
+    echo '  <meta property="og:description" content="' . e($description) . '">' . PHP_EOL;
+    echo '  <meta property="og:url" content="' . e($url) . '">' . PHP_EOL;
+    echo '  <meta name="twitter:card" content="summary">' . PHP_EOL;
+    echo '  <meta name="twitter:title" content="' . e($title) . '">' . PHP_EOL;
+    echo '  <meta name="twitter:description" content="' . e($description) . '">' . PHP_EOL;
+}
+
 function money($amount): string
 {
     return "\u{20B1}" . number_format((float)$amount, 2, '.', ',');

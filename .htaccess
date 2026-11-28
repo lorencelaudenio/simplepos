@@ -9,6 +9,9 @@ Options -Indexes
     RewriteEngine On
     RewriteRule (^|/)\. - [F,L]
 
+    # Serve the XML sitemap at an extensionless, crawler-friendly URL.
+    RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
+
     # Send old .php URLs to their extensionless equivalents.
     RewriteCond %{THE_REQUEST} \s/([^\s?]+)\.php[\s?] [NC]
     RewriteRule ^ /%1 [R=301,L,NE,QSA]

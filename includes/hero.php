@@ -2,6 +2,22 @@
 declare(strict_types=1);
 /** Public landing page shown at the root when no user is logged in. */
 $heroName = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
+$heroDescription = $heroName . ' - cashier, inventory, sales history, and secure backups in one lightweight web app.';
+$heroSchema = [
+    '@context' => 'https://schema.org',
+    '@type' => 'WebApplication',
+    'name' => $heroName,
+    'description' => $heroDescription,
+    'applicationCategory' => 'BusinessApplication',
+    'operatingSystem' => 'Any',
+    'url' => site_url(''),
+    'featureList' => ['Cashier', 'Inventory', 'Sales History', 'Backup & Restore'],
+    'offers' => [
+        '@type' => 'Offer',
+        'price' => '0',
+        'priceCurrency' => 'USD',
+    ],
+];
 ?>
 <!doctype html>
 <html lang="en">
@@ -9,8 +25,15 @@ $heroName = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online P
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#15803d">
-  <meta name="description" content="<?= e($heroName) ?> - cashier, inventory, sales history, and secure backups in one lightweight web app.">
-  <title><?= e($heroName) ?> - Point of Sale</title>
+  <meta name="referrer" content="same-origin">
+  <?php seo_tags([
+      'title' => $heroName . ' - Point of Sale',
+      'description' => $heroDescription,
+      'path' => '',
+      'robots' => 'index, follow',
+      'site_name' => $heroName,
+  ]); ?>
+  <script type="application/ld+json"><?= json_encode($heroSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>

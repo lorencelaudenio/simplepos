@@ -119,7 +119,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Install - Simple Online POS</title>
+  <meta name="referrer" content="same-origin">
+  <?php seo_tags([
+      'title' => 'Install - Simple Online POS',
+      'description' => 'One-time setup page for Simple Online POS.',
+      'path' => 'install',
+      'site_name' => 'Simple Online POS',
+  ]); ?>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>

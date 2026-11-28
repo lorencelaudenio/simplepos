@@ -22,13 +22,15 @@ A lightweight, responsive point-of-sale system built with native PHP 8.1+, MySQL
 
 Pages and API endpoints use extensionless URLs such as `/login` and `/api/products`. Apache `mod_rewrite` must be enabled; old `.php` URLs redirect automatically.
 
-If you need to change database credentials later, edit `config/database.local.php` or set `POS_DB_HOST`, `POS_DB_NAME`, `POS_DB_USER`, and `POS_DB_PASS` environment variables. Set `POS_APP_URL` (for example `https://pos.example.com`) or `POS_ALLOWED_HOSTS` so activation links never depend on an untrusted `Host` header.
+If you need to change database credentials later, edit `config/database.local.php` or set `POS_DB_HOST`, `POS_DB_NAME`, `POS_DB_USER`, and `POS_DB_PASS` environment variables. Set `POS_APP_URL` (for example `https://pos.example.com`) or `POS_ALLOWED_HOSTS` so activation links never depend on an untrusted `Host` header. `POS_APP_URL` is also used for canonical URLs and the sitemap, so set it to the public HTTPS URL when going live.
+
+The public landing page includes canonical, description, Open Graph, Twitter, and structured-data metadata. Private dashboard and account pages are marked `noindex, nofollow`; `robots.txt` points crawlers to `/sitemap.xml`.
 
 Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`) so receipts and reports use local time.
 
 ## Features
 
-- **Public hero page:** the root URL (`/`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages.
+- **Public hero page:** the root URL (`/`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages. It includes SEO metadata, structured data, `robots.txt`, and `/sitemap.xml`; private pages are set to `noindex`.
 - **Signup with email confirmation and admin approval:** clients register themselves, confirm a 24-hour email link, then an administrator enables the account from **Users** before it can access the POS.
 - **Multi-user, one app:** One Website Administrator manages the Admin Dashboard (accounts, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. Settings and Log out live in the header account menu for both roles. API endpoints enforce these roles server-side and allow only one administrator.
 - **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), desktop/mobile browser camera scanner with camera selection (phones open the back camera by default), cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts. Store name, address, and optional TIN ID and contact number are configurable under client **Settings** and appear in the receipt header.

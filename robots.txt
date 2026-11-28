@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /vendor/
+Disallow: /uploads/
+Disallow: /login
+Disallow: /signup
+Disallow: /activate
+Disallow: /resend
+Disallow: /install
+Disallow: /logout
+Disallow: /*.php$
+
+Sitemap: /sitemap.xml

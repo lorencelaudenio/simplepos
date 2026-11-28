@@ -66,7 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Log in - <?= e($websiteName) ?></title>
+  <meta name="referrer" content="same-origin">
+  <?php seo_tags([
+      'title' => 'Log in - ' . $websiteName,
+      'description' => 'Sign in to ' . $websiteName . ' to manage your store.',
+      'path' => 'login',
+      'site_name' => $websiteName,
+  ]); ?>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/app.css?v=4">
 </head>
