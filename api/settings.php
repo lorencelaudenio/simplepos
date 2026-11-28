@@ -73,6 +73,12 @@ api_route(function () use ($action) {
             if (array_key_exists('smtp_from', $values) && mb_strlen($values['smtp_from']) > 200) {
                 fail('From email is too long.');
             }
+            if (array_key_exists('smtp_from', $values)
+                && $values['smtp_from'] !== ''
+                && !filter_var($values['smtp_from'], FILTER_VALIDATE_EMAIL)
+            ) {
+                fail('Enter a valid From Email address.');
+            }
             if (array_key_exists('smtp_from_name', $values) && mb_strlen($values['smtp_from_name']) > 150) {
                 fail('From name is too long.');
             }
@@ -117,7 +123,7 @@ api_route(function () use ($action) {
         }
         $store = get_setting('store_name', 'Simple Online POS');
         try {
-            send_pos_email(
+            $result = send_pos_email(
                 $email,
                 $store . ' email test',
                 "This is a test email from " . $store . ".\n\nIf you received this, your SMTP settings are working."
@@ -127,7 +133,11 @@ api_route(function () use ($action) {
         } catch (Throwable $ex) {
             fail('Email could not be sent: ' . $ex->getMessage(), 502);
         }
-        json_ok([], 'Test email sent successfully.');
+        error_log('POS test email accepted for ' . $email . ' via ' . ($result['method'] ?? 'smtp') . '.');
+        json_ok(
+            ['method' => $result['method'] ?? 'smtp'],
+            'Test email was accepted by the mail server for ' . $email . '. Check your spam folder if it does not arrive.'
+        );
     }
 
     fail('Unknown settings action.', 404);

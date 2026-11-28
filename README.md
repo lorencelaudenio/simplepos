@@ -42,7 +42,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 
 Registration is open, but new accounts cannot use the POS until their email is confirmed and an administrator approves them:
 
-1. Configure SMTP under **Website Settings** (or using `smtp_host`, `smtp_port`, `smtp_secure`, `smtp_user`, `smtp_pass`, `smtp_from`).
+1. Configure SMTP under **Website Settings** (or using `smtp_host`, `smtp_port`, `smtp_secure`, `smtp_user`, `smtp_pass`, `smtp_from`). `From Email` must be a valid sender address; leave it blank to use `SMTP Username` when that is a valid email address. Many providers reject mail from an unverified or fake sender.
 2. A cashier opens `signup` from the login/hero page and submits name, username, email, and password.
 3. The account is created as an inactive **Client** and a 24-hour confirmation link is emailed to them.
 4. The cashier opens the link in `activate`; the email is marked confirmed, but the account stays inactive until an administrator enables it from **Users**.

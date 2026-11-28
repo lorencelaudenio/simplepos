@@ -337,8 +337,10 @@ function send_pos_email(
     $secure = strtolower(get_setting('smtp_secure', 'tls'));
     $username = get_setting('smtp_user');
     $password = get_setting('smtp_pass');
-    $from = get_setting('smtp_from') ?: $username ?: 'pos@localhost';
-    $from = filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : 'pos@localhost';
+    $from = get_setting('smtp_from') ?: $username;
+    if (!filter_var($from, FILTER_VALIDATE_EMAIL)) {
+        fail('The From Email is missing or invalid. Set a valid sender address under Website Settings.', 500);
+    }
     $fromName = get_setting('smtp_from_name', 'Simple Online POS');
 
     if (class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
@@ -358,6 +360,8 @@ function send_pos_email(
         }
         $mail->setFrom($from, $fromName);
         $mail->addAddress($to);
+        $mail->CharSet = 'UTF-8';
+        $mail->isHTML(false);
         $mail->Subject = $subject;
         $mail->Body = $body;
         if ($filename !== null && $attachment !== null) {
@@ -380,7 +384,7 @@ function send_pos_email(
     $mailer->subject = $subject;
     $mailer->body = $body;
     if ($filename !== null && $attachment !== null) {
-        $mailer->addAttachment($filename, $attachment);
+        $mailer->addAttachment($filename, $attachment, $mimeType);
     }
     $mailer->send();
     return ['method' => 'builtin-smtp'];

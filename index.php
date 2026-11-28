@@ -206,7 +206,7 @@ if (!current_user()) {
       </label>
       <label class="field">SMTP Username<input type="text" id="setting-smtp_user" autocomplete="off"></label>
       <label class="field">SMTP Password<input type="password" id="setting-smtp_pass" placeholder="Leave blank to keep current" autocomplete="new-password"></label>
-      <label class="field">From Email<input type="email" id="setting-smtp_from"></label>
+      <label class="field">From Email<input type="email" id="setting-smtp_from" placeholder="you@example.com"><span class="muted small">Use your SMTP login address or a verified sender.</span></label>
       <label class="field">From Name<input type="text" id="setting-smtp_from_name"></label>
     </div>
     <div class="row-between" style="margin-top:14px;gap:12px;flex-wrap:wrap">

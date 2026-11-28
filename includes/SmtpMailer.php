@@ -21,9 +21,9 @@ class SmtpMailer
     private $socket = null;
     private string $lastStep = '(connect)';
 
-    public function addAttachment(string $filename, string $content): void
+    public function addAttachment(string $filename, string $content, string $mimeType = 'application/octet-stream'): void
     {
-        $this->attachments[] = ['name' => $filename, 'content' => $content];
+        $this->attachments[] = ['name' => $filename, 'content' => $content, 'mime' => $mimeType];
     }
 
     public function send(): void
@@ -78,7 +78,7 @@ class SmtpMailer
             $this->expect(220, $this->readResponse(), 'server greeting');
 
             $this->lastStep = 'EHLO';
-            $ehlo = $this->command('EHLO ' . $this->helloHost(), 250, 'EHLO');
+            $ehlo = $this->command('EHLO ' . $this->ehloHost(), 250, 'EHLO');
             $extensions = $this->extensionLines($ehlo);
 
             if ($secure === 'tls') {
@@ -92,7 +92,7 @@ class SmtpMailer
                 if (!@stream_socket_enable_crypto($this->socket, true, $this->cryptoMethod())) {
                     throw new RuntimeException('SMTP TLS negotiation failed after STARTTLS.');
                 }
-                $ehlo = $this->command('EHLO ' . $this->helloHost(), 250, 'EHLO after STARTTLS');
+                $ehlo = $this->command('EHLO ' . $this->ehloHost(), 250, 'EHLO after STARTTLS');
                 $extensions = $this->extensionLines($ehlo);
             }
 
@@ -143,10 +143,32 @@ class SmtpMailer
         }
     }
 
-    private function helloHost(): string
+    /**
+     * SMTP EHLO name must be a stable server hostname, never the browser's Host
+     * header. Many providers reject EHLO localhost or non-FQDN values.
+     */
+    private function ehloHost(): string
     {
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        return preg_replace('/[^A-Za-z0-9.\-]/', '', $host) ?: 'localhost';
+        $configured = trim((string)(getenv('POS_APP_URL') ?: ''));
+        if ($configured !== '') {
+            $host = parse_url($configured, PHP_URL_HOST);
+            if (is_string($host) && $host !== '') {
+                return $this->cleanHost($host);
+            }
+        }
+
+        $serverName = trim((string)($_SERVER['SERVER_NAME'] ?? ''));
+        if ($serverName !== '' && strpos($serverName, '.') !== false) {
+            return $this->cleanHost($serverName);
+        }
+
+        return $this->cleanHost($this->host);
+    }
+
+    private function cleanHost(string $host): string
+    {
+        $host = preg_replace('/[^A-Za-z0-9.\-]/', '', $host) ?? '';
+        return trim($host, '.-') !== '' ? trim($host, '.-') : 'localhost';
     }
 
     private function cryptoMethod(): int
@@ -213,30 +235,52 @@ class SmtpMailer
         return str_replace("\n", "\r\n", $message);
     }
 
+    private function encodedHeader(string $value): string
+    {
+        return '=?UTF-8?B?' . base64_encode($value) . '?=';
+    }
+
+    /** @return array{0:string,1:string} ASCII fallback and RFC 5987 encoded name. */
+    private function attachmentName(string $name): array
+    {
+        $ascii = preg_replace('/[^\x20-\x7E]/', '_', $name) ?? 'attachment';
+        $ascii = str_replace(['"', '\\', "\r", "\n"], '_', $ascii);
+        if (trim($ascii) === '') {
+            $ascii = 'attachment';
+        }
+        return [$ascii, rawurlencode($name)];
+    }
+
     private function buildMessage(): string
     {
         $boundary = 'POSBOUND' . bin2hex(random_bytes(12));
-        $subject = '=?UTF-8?B?' . base64_encode($this->subject) . '?=';
-        $fromName = str_replace(["\r", "\n"], ' ', $this->fromName);
-        $fromName = '=?UTF-8?B?' . base64_encode($fromName) . '?=';
         $headers = [
-            'From: ' . $fromName . ' <' . $this->from . '>',
+            'From: ' . $this->encodedHeader($this->fromName) . ' <' . $this->from . '>',
             'To: <' . $this->to . '>',
-            'Subject: ' . $subject,
-            'Date: ' . date('r'),
+            'Subject: ' . $this->encodedHeader($this->subject),
+            'Date: ' . gmdate('D, d M Y H:i:s') . ' +0000',
+            'Message-ID: <' . bin2hex(random_bytes(16)) . '@' . $this->ehloHost() . '>',
             'MIME-Version: 1.0',
             'Content-Type: multipart/mixed; boundary="' . $boundary . '"',
+            'X-Mailer: Simple Online POS',
         ];
+
+        // Encoding the body avoids 8-bit transport issues with UTF-8 text.
         $body = '--' . $boundary . "\n"
             . "Content-Type: text/plain; charset=UTF-8\n"
-            . "Content-Transfer-Encoding: 8bit\n\n"
-            . $this->body . "\n\n";
+            . "Content-Transfer-Encoding: base64\n\n"
+            . chunk_split(base64_encode($this->body), 76, "\n");
         foreach ($this->attachments as $attachment) {
+            [$asciiName, $encodedName] = $this->attachmentName($attachment['name']);
+            $mime = preg_replace('/[^A-Za-z0-9.+\-\/]/', '', $attachment['mime'] ?? '');
+            if ($mime === '') {
+                $mime = 'application/octet-stream';
+            }
             $body .= '--' . $boundary . "\n"
-                . 'Content-Type: application/octet-stream; name="' . $attachment['name'] . '"' . "\n"
-                . 'Content-Disposition: attachment; filename="' . $attachment['name'] . '"' . "\n"
+                . 'Content-Type: ' . $mime . '; name="' . $asciiName . '"; name*=UTF-8\'\'' . $encodedName . "\n"
+                . 'Content-Disposition: attachment; filename="' . $asciiName . '"; filename*=UTF-8\'\'' . $encodedName . "\n"
                 . "Content-Transfer-Encoding: base64\n\n"
-                . chunk_split(base64_encode($attachment['content']), 76, "\n") . "\n";
+                . chunk_split(base64_encode($attachment['content']), 76, "\n");
         }
         $body .= '--' . $boundary . "--\n";
         return implode("\n", $headers) . "\n\n" . $body;
