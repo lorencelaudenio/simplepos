@@ -31,7 +31,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 ## Features
 
 - **Public hero page:** the root URL (`/`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages. It includes SEO metadata, structured data, `robots.txt`, and `/sitemap.xml`; private pages are set to `noindex`.
-- **Signup with email confirmation and admin approval:** clients register themselves, confirm a 24-hour email link, then an administrator enables the account from **Users** before it can access the POS.
+- **Signup with email confirmation:** clients register themselves and confirm a 24-hour email link; the account becomes active immediately after confirmation. Administrators can still disable or re-enable accounts from **Users**.
 - **Multi-user, one app:** One Website Administrator manages the Admin Dashboard (accounts, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. Settings and Log out live in the header account menu for both roles. API endpoints enforce these roles server-side and allow only one administrator.
 - **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), desktop/mobile browser camera scanner with camera selection (phones open the back camera by default), cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts. Store name, address, and optional TIN ID and contact number are configurable under client **Settings** and appear in the receipt header.
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
@@ -43,15 +43,15 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 
 ## Client signup and email activation
 
-Registration is open, but new accounts cannot use the POS until their email is confirmed and an administrator approves them:
+Registration is open, but new accounts cannot use the POS until their email is confirmed:
 
 1. Configure SMTP under **Website Settings** (or using `smtp_host`, `smtp_port`, `smtp_secure`, `smtp_user`, `smtp_pass`, `smtp_from`). `From Email` must be a valid sender address; leave it blank to use `SMTP Username` when that is a valid email address. Many providers reject mail from an unverified or fake sender.
 2. A cashier opens `signup` from the login/hero page and submits name, username, email, and password.
 3. The account is created as an inactive **Client** and a 24-hour confirmation link is emailed to them.
-4. The cashier opens the link in `activate`; the email is marked confirmed, but the account stays inactive until an administrator enables it from **Users**.
+4. The cashier opens the link in `activate`; the email is marked confirmed and the account becomes active immediately, so they can sign in without waiting for administrator approval.
 5. If the email is lost, they can request a fresh link from `resend` (one request per minute).
 
-Changing an email address under **Account Settings** also requires a confirmation link sent to the new address; the new email is marked unverified until that link is opened. Changing an existing email requires SMTP to be configured first. Public signups always create Client accounts, never Website Administrators. Administrators can also create accounts with an email address from **Users**; those addresses are stored as verified. If the activation email cannot be sent, the pending account is removed automatically. Only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
+Changing an email address under **Account Settings** also requires a confirmation link sent to the new address; the new email is marked unverified until that link is opened. Changing an existing email requires SMTP to be configured first. Public signups always create Client accounts, never Website Administrators. Administrators can also create accounts with an email address from **Users**; those addresses are stored as verified. If the activation email cannot be sent, the pending account is removed automatically. A disabled account cannot reactivate itself by requesting a new activation link. Only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
 
 ## Client sales backup and restore
 

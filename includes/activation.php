@@ -215,7 +215,7 @@ function activation_send_email(array $activation): array
     $body = "Hello " . $name . ",\n\n"
         . ($emailChange
             ? "Confirm the new email address on your account by opening this link:\n\n"
-            : "Your client account has been created. Confirm your email below; an administrator will enable the account after confirmation:\n\n")
+            : "Your client account has been created. Confirm your email below to activate your account and start signing in:\n\n")
         . $link . "\n\n"
         . "This link expires in 24 hours. If you did not request this, you can ignore this email.\n\n"
         . "— " . $website;
@@ -321,15 +321,30 @@ function activation_activate(PDO $pdo, string $token): array
             fail('That email address is already registered by another account.', 409);
         }
 
-        // New signups stay inactive until an administrator approves them.
-        // Email-change confirmations do not alter account status.
+        $emailKey = activation_email_key($userId);
+        $emailStateStmt = $pdo->prepare('SELECT setting_value FROM settings WHERE setting_key = ? LIMIT 1');
+        $emailStateStmt->execute([$emailKey]);
+        $emailStateRaw = $emailStateStmt->fetchColumn();
+        $emailState = is_string($emailStateRaw) ? json_decode($emailStateRaw, true) : null;
+        $emailAlreadyVerified = is_array($emailState) && !empty($emailState['verified']);
+
+        // Email-change confirmations do not alter account status. Only the first
+        // signup confirmation activates; admin-disabled accounts stay disabled.
         $emailData = json_encode([
             'email' => (string)$activation['email'],
             'verified' => true,
             'verified_at' => date('Y-m-d H:i:s'),
         ], JSON_UNESCAPED_UNICODE);
         $emailStmt = $pdo->prepare('UPDATE settings SET setting_value = ? WHERE setting_key = ?');
-        $emailStmt->execute([$emailData, activation_email_key($userId)]);
+        $emailStmt->execute([$emailData, $emailKey]);
+
+        if ($purpose === 'signup' && !$emailAlreadyVerified) {
+            // Confirming the email is the final approval for a public client account.
+            $statusStmt = $pdo->prepare(
+                'UPDATE users SET status = "active" WHERE id = ? AND role = "cashier" AND status = "inactive"'
+            );
+            $statusStmt->execute([$userId]);
+        }
 
         $delete = $pdo->prepare('DELETE FROM settings WHERE setting_key = ?');
         $delete->execute([activation_token_key($token)]);
@@ -360,6 +375,9 @@ function activation_resend(PDO $pdo, string $email): array
     }
     if ($user['status'] === 'active') {
         fail('This account is already active. You can sign in.', 400);
+    }
+    if (!empty($record['verified'])) {
+        fail('This account is disabled. Please contact the administrator.', 400);
     }
 
     $existing = null;

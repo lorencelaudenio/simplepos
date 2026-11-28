@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="referrer" content="same-origin">
   <?php seo_tags([
       'title' => 'Create account - ' . $websiteName,
-      'description' => 'Create a client account for ' . $websiteName . '. Email confirmation and administrator approval are required.',
+      'description' => 'Create a client account for ' . $websiteName . '. Confirm your email to activate the account and start using the POS.',
       'path' => 'signup',
       'site_name' => $websiteName,
   ]); ?>
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="notice"><i class="bi bi-info-circle"></i> Registration is temporarily unavailable. Please try again later.</div>
     <?php endif; ?>
     <?php if ($success): ?>
-      <div class="login-success"><i class="bi bi-envelope-check-fill"></i> Check <strong><?= e($values['email']) ?></strong> for your activation link. The link expires in 24 hours.</div>
+      <div class="login-success"><i class="bi bi-envelope-check-fill"></i> Check <strong><?= e($values['email']) ?></strong> for your activation link. The link expires in 24 hours. After confirming, your account is active and you can sign in.</div>
       <p class="auth-link" style="margin-top:18px;margin-bottom:0">Email not arriving? <a href="resend">Resend activation</a></p>
     <?php else: ?>
       <form method="post" action="signup">

@@ -200,7 +200,7 @@ if (!current_user()) {
     <div><h1>Users</h1><p>Create website administrators and POS client accounts.</p></div>
     <button class="btn btn-primary" id="add-user-btn" type="button"><i class="bi bi-person-plus"></i> Add User</button>
   </div>
-  <div class="notice"><i class="bi bi-info-circle"></i> Client accounts use the Cashier, Inventory, Sales History, and Settings tabs. New signups stay inactive until you enable them here. Website administrators only see this admin dashboard.</div>
+  <div class="notice"><i class="bi bi-info-circle"></i> Client accounts use the Cashier, Inventory, Sales History, and Settings tabs. New signups become active as soon as they confirm their email. Website administrators only see this admin dashboard.</div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>

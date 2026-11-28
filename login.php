@@ -22,7 +22,7 @@ if (isset($_GET['signedup'])) {
     $notice = 'Account created. Check your email for the activation link.';
 }
 if (isset($_GET['activated'])) {
-    $notice = 'Email confirmed. Your account is waiting for administrator approval.';
+    $notice = 'Email confirmed. Your account is active; you can sign in now.';
 }
 if (isset($_GET['email_changed'])) {
     $notice = 'Your email address has been updated.';

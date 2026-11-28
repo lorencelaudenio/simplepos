@@ -57,7 +57,7 @@ if ($token === '') {
         <div class="login-success"><i class="bi bi-check-circle-fill"></i> Your email address has been updated.</div>
         <a class="btn btn-primary btn-block" href="login?email_changed=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
       <?php else: ?>
-        <div class="login-success"><i class="bi bi-check-circle-fill"></i> Email confirmed. An administrator will enable your account before you can sign in.</div>
+        <div class="login-success"><i class="bi bi-check-circle-fill"></i> Email confirmed. Your account is active. You can sign in now.</div>
         <a class="btn btn-primary btn-block" href="login?activated=1"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
       <?php endif; ?>
     <?php else: ?>
