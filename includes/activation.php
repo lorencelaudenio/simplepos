@@ -259,6 +259,7 @@ function activation_register(PDO $pdo, string $username, string $fullName, strin
         );
         $insert->execute([$username, password_hash($password, PASSWORD_DEFAULT), $fullName]);
         $userId = (int)$pdo->lastInsertId();
+        client_store_init($pdo, $userId);
 
         $emailJson = json_encode(['email' => $email, 'verified' => false], JSON_UNESCAPED_UNICODE);
         $emailStmt = $pdo->prepare(
@@ -286,6 +287,7 @@ function activation_cleanup(PDO $pdo, int $userId, string $token): void
     $stmt->execute([activation_token_key($token), activation_email_key($userId)]);
     $stmt = $pdo->prepare('DELETE FROM users WHERE id = ? AND status = "inactive"');
     $stmt->execute([$userId]);
+    client_store_delete($pdo, $userId);
 }
 
 /** @return array<string,mixed> */

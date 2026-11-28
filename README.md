@@ -38,7 +38,7 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 - **Sales History:** Today/Yesterday/Week/Month/Year/Custom/All filters, total sales, receipt count, average transaction, Chart.js daily sales chart, transaction list, reprintable receipts, item-level Excel export respecting filters.
 - **Backup & Restore:** timestamped SQL download, SMTP email backup (PHPMailer when installed, built-in SMTP client otherwise), validated `.sql` upload, confirmation dialog, automatic safety backup before restore, admin-only access.
 - **Client sales backup:** clients can download or restore only their own sales and sale items from **Settings**; shared products, stock, users, and settings are never included.
-- **Website identity:** the administrator sets **Website Name** under **Website Settings**; it appears on guest-facing pages and account emails. A client’s **Store Name** appears only after login and on that client’s receipts.
+- **Website identity:** the administrator sets **Website Name** under **Website Settings**; it appears on guest-facing pages and account emails. Each client has private Store Settings initialized to **My Store** and **Your address**, with blank optional TIN ID and contact number. A client’s store details appear only after login and on that client’s receipts, and are never shared with other clients.
 - **Security:** PHP sessions, `password_hash()`/`password_verify()`, PDO prepared statements, CSRF tokens on all writes, server-side validation, escaped output, file upload checks, role enforcement, and web access denied to `config/`, `includes/`, `uploads/`, and `vendor/`.
 
 ## Client signup and email activation

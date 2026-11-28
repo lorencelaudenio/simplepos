@@ -161,6 +161,7 @@ api_route(function () use ($action) {
                 );
                 $stmt->execute([$username, password_hash($password, PASSWORD_DEFAULT), $fullName, $storedRole, $status]);
                 $id = (int)$pdo->lastInsertId();
+                client_store_init($pdo, $id);
                 $message = 'User created successfully.';
             }
 
@@ -231,6 +232,7 @@ api_route(function () use ($action) {
         $stmt = $pdo->prepare('DELETE FROM settings WHERE setting_key = ?');
         $stmt->execute([activation_email_key($id)]);
         client_backup_history_delete($pdo, $id);
+        client_store_delete($pdo, $id);
         clear_setting_cache();
         json_ok([], 'User deleted successfully.');
     }

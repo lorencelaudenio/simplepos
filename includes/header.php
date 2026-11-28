@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
-$navUser = current_user() ?? ['full_name' => '', 'username' => '', 'role' => 'cashier'];
+$navUser = current_user() ?? ['id' => 0, 'full_name' => '', 'username' => '', 'role' => 'cashier'];
+$clientStore = client_store_settings(db(), (int)($navUser['id'] ?? 0));
 $brandName = is_admin()
     ? (get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS')
-    : get_setting('store_name', 'My Store');
+    : ($clientStore['store_name'] ?: 'My Store');
 $navRole = role_label((string)$navUser['role']);
 $navLowStock = 0;
 try {

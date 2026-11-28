@@ -12,12 +12,18 @@ api_route(function () use ($action) {
     ];
     $isAdmin = is_admin();
     $allowedKeys = $isAdmin ? array_merge(['website_name'], $smtpKeys) : $storeKeys;
+    $currentUser = current_user();
+    $userId = (int)($currentUser['id'] ?? 0);
+    $pdo = db();
+    $storeDefaults = client_store_defaults();
 
-    $publicSettings = static function () use ($allowedKeys, $isAdmin): array {
+    $publicSettings = static function () use ($allowedKeys, $storeKeys, $isAdmin, $pdo, $userId, $storeDefaults): array {
         $settings = [];
         foreach ($allowedKeys as $key) {
             if ($key === 'website_name') {
                 $settings[$key] = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
+            } elseif (!$isAdmin && in_array($key, $storeKeys, true)) {
+                $settings[$key] = client_store_setting($pdo, $userId, $key, $storeDefaults[$key]);
             } else {
                 $settings[$key] = get_setting($key);
             }
@@ -104,7 +110,6 @@ api_route(function () use ($action) {
             }
         }
 
-        $pdo = db();
         $stmt = $pdo->prepare(
             'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
              ON DUPLICATE KEY UPDATE setting_value = ?'
@@ -112,7 +117,10 @@ api_route(function () use ($action) {
         $pdo->beginTransaction();
         try {
             foreach ($values as $key => $value) {
-                $stmt->execute([$key, $value, $value]);
+                $dbKey = (!$isAdmin && in_array($key, $storeKeys, true))
+                    ? client_store_key($userId, $key)
+                    : $key;
+                $stmt->execute([$dbKey, $value, $value]);
             }
             $pdo->commit();
         } catch (Throwable $ex) {

@@ -226,9 +226,82 @@ function get_setting(string $key, string $default = ''): string
     return $cache[$key];
 }
 
+/** Per-client store settings. Keys are stored separately from global website/SMTP settings. */
+function client_store_key(int $userId, string $key): string
+{
+    return 'client_store_' . $userId . '_' . $key;
+}
+
+function client_store_defaults(): array
+{
+    return [
+        'store_name' => 'My Store',
+        'store_address' => 'Your address',
+        'tin_id' => '',
+        'contact_number' => '',
+        'receipt_footer' => 'Thank you for shopping with us!',
+    ];
+}
+
+function client_store_init(PDO $pdo, int $userId): void
+{
+    $stmt = $pdo->prepare('INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)');
+    foreach (client_store_defaults() as $key => $default) {
+        $stmt->execute([client_store_key($userId, $key), $default]);
+    }
+    clear_setting_cache();
+}
+
+function client_store_setting(PDO $pdo, int $userId, string $key, string $default = ''): string
+{
+    if ($userId <= 0) {
+        return $default;
+    }
+    $stmt = $pdo->prepare('SELECT setting_value FROM settings WHERE setting_key = ? LIMIT 1');
+    $stmt->execute([client_store_key($userId, $key)]);
+    $value = $stmt->fetchColumn();
+    if ($value !== false) {
+        return (string)$value;
+    }
+    // Legacy accounts used shared global values before per-user settings existed.
+    $stmt->execute([$key]);
+    $legacy = $stmt->fetchColumn();
+    return $legacy === false ? $default : (string)$legacy;
+}
+
+function client_store_delete(PDO $pdo, int $userId): void
+{
+    $keys = [];
+    foreach (array_keys(client_store_defaults()) as $key) {
+        $keys[] = client_store_key($userId, $key);
+    }
+    $placeholders = implode(',', array_fill(0, count($keys), '?'));
+    $stmt = $pdo->prepare('DELETE FROM settings WHERE setting_key IN (' . $placeholders . ')');
+    $stmt->execute($keys);
+    clear_setting_cache();
+}
+
+function client_store_settings(PDO $pdo, int $userId): array
+{
+    if (!isset($GLOBALS['pos_client_store_cache']) || !is_array($GLOBALS['pos_client_store_cache'])) {
+        $GLOBALS['pos_client_store_cache'] = [];
+    }
+    $cache =& $GLOBALS['pos_client_store_cache'];
+    if (array_key_exists($userId, $cache)) {
+        return $cache[$userId];
+    }
+    $settings = [];
+    foreach (client_store_defaults() as $key => $default) {
+        $settings[$key] = client_store_setting($pdo, $userId, $key, $default);
+    }
+    $cache[$userId] = $settings;
+    return $settings;
+}
+
 function clear_setting_cache(): void
 {
     $GLOBALS['pos_setting_cache'] = [];
+    $GLOBALS['pos_client_store_cache'] = [];
 }
 
 function set_setting(string $key, string $value): void

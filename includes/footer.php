@@ -2,6 +2,9 @@
 declare(strict_types=1);
 $footerUser = current_user();
 $footerRole = $footerUser ? (string)$footerUser['role'] : '';
+$footerStoreName = $footerUser
+    ? (client_store_settings(db(), (int)$footerUser['id'])['store_name'] ?: 'My Store')
+    : 'My Store';
 ?>
 </main>
 
@@ -35,7 +38,7 @@ $footerRole = $footerUser ? (string)$footerUser['role'] : '';
   window.POS_CONFIG = {
     csrfToken: <?= json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
     isAdmin: <?= is_admin() ? 'true' : 'false' ?>,
-    storeName: <?= json_encode(get_setting('store_name', 'My Store'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+    storeName: <?= json_encode($footerStoreName, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
     userRole: <?= json_encode($footerRole) ?>
   };
 </script>

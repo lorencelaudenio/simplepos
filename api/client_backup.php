@@ -14,7 +14,7 @@ api_route(function () use ($action) {
     if ($userId <= 0) {
         fail('Your session is invalid. Please log in again.', 401);
     }
-    $storeName = get_setting('store_name', 'My Store');
+    $storeName = client_store_settings($pdo, $userId)['store_name'] ?: 'My Store';
     $recordHistory = static function (array $entry) use ($pdo, $userId): void {
         try {
             client_backup_history_add($pdo, $userId, $entry);
