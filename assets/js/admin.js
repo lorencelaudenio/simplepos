@@ -175,6 +175,12 @@
         const input = $('account-' + key);
         if (input) input.value = profile[key] == null ? '' : profile[key];
       });
+      const clientEmailLabel = $('client-backup-email-label');
+      if (clientEmailLabel) {
+        clientEmailLabel.textContent = profile.email
+          ? 'Email on file: ' + profile.email
+          : 'No email on file yet. Add one under Account Settings first.';
+      }
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
 

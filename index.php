@@ -151,8 +151,10 @@ if (!current_user()) {
   <div class="backup-grid" style="margin-top:18px">
     <div class="card backup-card">
       <h2 class="card-title"><i class="bi bi-cloud-download"></i> My Backup</h2>
-      <p class="muted small">Download a backup of only your sales and sale items. Shared products, stock, users, and settings are not included.</p>
-      <button class="btn btn-primary btn-block" id="client-backup-download-btn" type="button" style="margin-top:12px"><i class="bi bi-download"></i> Download My Backup</button>
+      <p class="muted small">Choose how to save a backup of only your sales and sale items. Shared products, stock, users, and settings are not included.</p>
+      <button class="btn btn-primary btn-block" id="client-backup-download-btn" type="button" style="margin-top:12px"><i class="bi bi-download"></i> Save to Device</button>
+      <button class="btn btn-block" id="client-backup-email-btn" type="button" style="margin-top:8px"><i class="bi bi-envelope-paper"></i> Send to My Email</button>
+      <p class="muted small" id="client-backup-email-label" style="margin-top:8px"></p>
     </div>
     <div class="card backup-card">
       <h2 class="card-title"><i class="bi bi-cloud-upload"></i> My Restore</h2>

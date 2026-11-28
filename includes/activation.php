@@ -23,6 +23,22 @@ function activation_token_key(string $token): string
     return activation_token_prefix() . $token;
 }
 
+/** Return the email currently saved for a user, or an empty string. */
+function activation_get_email(PDO $pdo, int $userId, bool $verifiedOnly = false): string
+{
+    $stmt = $pdo->prepare('SELECT setting_value FROM settings WHERE setting_key = ? LIMIT 1');
+    $stmt->execute([activation_email_key($userId)]);
+    $raw = $stmt->fetchColumn();
+    if ($raw === false) {
+        return '';
+    }
+    $data = json_decode((string)$raw, true);
+    if (!is_array($data) || ($verifiedOnly && empty($data['verified']))) {
+        return '';
+    }
+    return (string)($data['email'] ?? '');
+}
+
 /**
  * @return array<string,mixed>|null
  *

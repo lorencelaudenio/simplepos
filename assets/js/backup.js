@@ -75,6 +75,13 @@
     } catch (error) { window.POS.toast(error.message, 'error'); }
   }
 
+  async function emailClientBackup() {
+    try {
+      const data = await window.POS.api('api/client_backup?action=email', { method: 'POST', body: {} });
+      window.POS.toast(data.message, 'success');
+    } catch (error) { window.POS.toast(error.message, 'error'); }
+  }
+
   function init() {
     if ($('backup-download-btn')) {
       $('backup-download-btn').addEventListener('click', function () {
@@ -88,6 +95,7 @@
           .catch(function (error) { window.POS.toast(error.message, 'error'); });
       });
     }
+    if ($('client-backup-email-btn')) $('client-backup-email-btn').addEventListener('click', emailClientBackup);
     if ($('backup-email-btn')) $('backup-email-btn').addEventListener('click', openEmailModal);
     if ($('restore-btn')) $('restore-btn').addEventListener('click', restoreBackup);
     if ($('client-restore-btn')) $('client-restore-btn').addEventListener('click', restoreClientBackup);

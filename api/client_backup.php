@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/api_bootstrap.php';
+require_once __DIR__ . '/../includes/activation.php';
 require_once __DIR__ . '/../includes/client_backup_lib.php';
 
 $action = $_GET['action'] ?? '';
@@ -34,6 +35,41 @@ api_route(function () use ($action) {
         header('X-Content-Type-Options: nosniff');
         echo $json;
         exit;
+    }
+
+    if ($action === 'email') {
+        $email = activation_get_email($pdo, $userId, true);
+        if ($email === '') {
+            fail('No verified email is registered on your account. Add and confirm one under Account Settings first.', 400);
+        }
+        if (get_setting('smtp_host') === '') {
+            fail('Email delivery is not configured. Ask an administrator to set up SMTP.', 400);
+        }
+        try {
+            $json = client_backup_generate($pdo, $userId);
+        } catch (Throwable $ex) {
+            error_log('POS client backup error: ' . $ex->getMessage());
+            fail('Your backup could not be generated. Please try again.', 500);
+        }
+        $filename = client_backup_filename('', $storeName);
+        try {
+            $result = send_backup_email(
+                $email,
+                'Your sales backup - ' . $storeName,
+                "Hello,\n\nAttached is a backup of your sales and sale items from " . $storeName
+                    . ".\nGenerated: " . date('Y-m-d H:i:s') . "\n\nKeep this file in a safe place.\n\n— " . $storeName,
+                $filename,
+                $json,
+                'application/json'
+            );
+        } catch (Throwable $ex) {
+            error_log('POS client backup email error: ' . $ex->getMessage());
+            fail('Backup email could not be sent: ' . $ex->getMessage(), 502);
+        }
+        json_ok(
+            ['method' => $result['method'] ?? 'smtp', 'filename' => $filename],
+            'Backup sent to ' . $email . '.'
+        );
     }
 
     if ($action === 'upload') {

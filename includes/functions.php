@@ -322,7 +322,8 @@ function send_pos_email(
     string $subject,
     string $body,
     ?string $filename = null,
-    ?string $attachment = null
+    ?string $attachment = null,
+    string $mimeType = 'application/sql'
 ): array {
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
         fail('Please enter a valid email address.');
@@ -360,7 +361,7 @@ function send_pos_email(
         $mail->Subject = $subject;
         $mail->Body = $body;
         if ($filename !== null && $attachment !== null) {
-            $mail->addStringAttachment($attachment, $filename, 'base64', 'application/sql');
+            $mail->addStringAttachment($attachment, $filename, 'base64', $mimeType);
         }
         $mail->send();
         return ['method' => 'phpmailer'];
@@ -385,10 +386,16 @@ function send_pos_email(
     return ['method' => 'builtin-smtp'];
 }
 
-/** Sends the generated SQL backup by email. */
-function send_backup_email(string $to, string $subject, string $body, string $filename, string $sql): array
-{
-    return send_pos_email($to, $subject, $body, $filename, $sql);
+/** Sends a generated backup file by email. */
+function send_backup_email(
+    string $to,
+    string $subject,
+    string $body,
+    string $filename,
+    string $sql,
+    string $mimeType = 'application/sql'
+): array {
+    return send_pos_email($to, $subject, $body, $filename, $sql, $mimeType);
 }
 
 function upload_dir(string $name): string
