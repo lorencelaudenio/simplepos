@@ -66,8 +66,15 @@
         throw new Error(data.error || 'Download failed.');
       }
       const disposition = response.headers.get('Content-Disposition') || '';
-      const match = disposition.match(/filename="?([^";]+)"?/i);
-      const filename = match ? match[1] : 'download';
+      let filename = 'download';
+      const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+      if (encoded && encoded[1]) {
+        try { filename = decodeURIComponent(encoded[1].replace(/^"|"$/g, '')); }
+        catch (err) { filename = encoded[1]; }
+      } else {
+        const match = disposition.match(/filename="?([^";]+)"?/i);
+        if (match && match[1]) filename = match[1];
+      }
       const blob = await response.blob();
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);

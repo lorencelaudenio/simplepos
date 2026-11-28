@@ -8,9 +8,29 @@ const CLIENT_BACKUP_VERSION = 1;
 const CLIENT_BACKUP_MAX_SALES = 10000;
 const CLIENT_BACKUP_MAX_ITEMS = 100000;
 
-function client_backup_filename(string $prefix = 'client_sales_backup'): string
+function client_backup_store_slug(string $storeName): string
 {
-    return $prefix . '_' . date('Ymd_His') . '.json';
+    $slug = preg_replace('/[^\p{L}\p{N}_-]+/u', '_', trim($storeName));
+    if (!is_string($slug)) {
+        return 'client_sales';
+    }
+    $slug = trim($slug, '_');
+    if ($slug === '') {
+        return 'client_sales';
+    }
+    return function_exists('mb_substr') ? mb_substr($slug, 0, 80) : substr($slug, 0, 80);
+}
+
+function client_backup_filename(string $suffix = '', string $storeName = ''): string
+{
+    if ($storeName === '' && function_exists('get_setting')) {
+        $storeName = get_setting('store_name', 'My Store');
+    }
+    $name = client_backup_store_slug($storeName);
+    if ($suffix !== '') {
+        $name .= '_' . $suffix;
+    }
+    return $name . '_' . date('Ymd_His') . '.json';
 }
 
 function client_backup_decimal($value): ?string

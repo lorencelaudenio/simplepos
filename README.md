@@ -52,7 +52,7 @@ Changing an email address under **Account Settings** also requires a confirmatio
 
 ## Client sales backup and restore
 
-Clients can download a `.json` backup of only their own sales and sale items from **Settings**, then restore it later from the same tab. Restore validates the file, replaces only rows linked to the signed-in account inside a transaction, and saves a safety backup of the current sales first. Products, stock movements, users, and store/SMTP settings are never included or changed.
+Clients can download a `.json` backup of only their own sales and sale items from **Settings**, then restore it later from the same tab. Backup filenames start with the store name and include a timestamp. Restore validates the file, replaces only rows linked to the signed-in account inside a transaction, and saves a safety backup of the current sales first. Products, stock movements, users, and store/SMTP settings are never included or changed.
 
 ## Optional: PHPMailer
 

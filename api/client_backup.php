@@ -13,6 +13,7 @@ api_route(function () use ($action) {
     if ($userId <= 0) {
         fail('Your session is invalid. Please log in again.', 401);
     }
+    $storeName = get_setting('store_name', 'My Store');
 
     if ($action === 'download') {
         try {
@@ -21,12 +22,13 @@ api_route(function () use ($action) {
             error_log('POS client backup error: ' . $ex->getMessage());
             fail('Your backup could not be generated. Please try again.', 500);
         }
-        $filename = client_backup_filename();
+        $filename = client_backup_filename('', $storeName);
+        $asciiFilename = preg_replace('/[^A-Za-z0-9._-]+/', '_', $filename);
         while (ob_get_level() > 0) {
             @ob_end_clean();
         }
         header('Content-Type: application/json; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="' . $asciiFilename . '"; filename*=UTF-8\'\'' . rawurlencode($filename));
         header('Content-Length: ' . strlen($json));
         header('Cache-Control: no-store, no-cache, must-revalidate');
         header('X-Content-Type-Options: nosniff');
@@ -116,7 +118,7 @@ api_route(function () use ($action) {
             error_log('POS client safety backup error: ' . $ex->getMessage());
             fail('Unable to create a safety backup. Restore cancelled.', 500);
         }
-        $safetyName = client_backup_filename('auto_before_client_restore_' . $userId);
+        $safetyName = client_backup_filename('auto_before_client_restore_' . $userId, $storeName);
         $safetyPath = upload_dir('backups') . DIRECTORY_SEPARATOR . $safetyName;
         if (file_put_contents($safetyPath, $safetyJson, LOCK_EX) === false) {
             fail('Unable to create a safety backup. Restore cancelled.', 500);
