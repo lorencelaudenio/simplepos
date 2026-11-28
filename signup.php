@@ -4,6 +4,7 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/activation.php';
+require_once __DIR__ . '/includes/captcha.php';
 
 if (current_user()) {
     header('Location: index');
@@ -25,6 +26,8 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf($_POST['csrf_token'] ?? '')) {
         $error = 'Invalid security token. Please refresh the page.';
+    } elseif (!verify_captcha($_POST['captcha'] ?? null)) {
+        $error = 'Incorrect security check. Please try again.';
     } elseif (!$dbReady) {
         $error = 'Registration is temporarily unavailable. Please try again later.';
     } elseif (!smtp_configured()) {
@@ -102,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label class="field" style="margin-top:14px">Email Address<input type="email" name="email" value="<?= e($values['email']) ?>" autocomplete="email" maxlength="150" required></label>
         <label class="field" style="margin-top:14px">Password<input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
         <label class="field" style="margin-top:14px">Confirm Password<input type="password" name="confirm_password" autocomplete="new-password" minlength="8" required></label>
+        <?= captcha_input() ?>
         <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-person-plus"></i> Create Account</button>
       </form>
       <p class="auth-link" style="margin-top:18px;margin-bottom:0">Already have an account? <a href="login">Sign in</a></p>

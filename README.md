@@ -22,7 +22,7 @@ A lightweight, responsive point-of-sale system built with native PHP 8.1+, MySQL
 
 Pages and API endpoints use extensionless URLs such as `/login` and `/api/products`. Apache `mod_rewrite` must be enabled; old `.php` URLs redirect automatically.
 
-If you need to change database credentials later, edit `config/database.local.php` or set `POS_DB_HOST`, `POS_DB_NAME`, `POS_DB_USER`, and `POS_DB_PASS` environment variables. Set `POS_APP_URL` (for example `https://pos.example.com`) or `POS_ALLOWED_HOSTS` so activation links never depend on an untrusted `Host` header. `POS_APP_URL` is also used for canonical URLs and the sitemap, so set it to the public HTTPS URL when going live.
+If you need to change database credentials later, edit `config/database.local.php` or set `POS_DB_HOST`, `POS_DB_NAME`, `POS_DB_USER`, and `POS_DB_PASS` environment variables. Set `POS_APP_URL` (for example `https://pos.example.com`) or `POS_ALLOWED_HOSTS` so activation links and welcome-email sign-in links never depend on an untrusted `Host` header. `POS_APP_URL` is also used for canonical URLs and the sitemap, so set it to the public HTTPS URL when going live.
 
 The public landing page includes canonical, description, Open Graph, Twitter, and structured-data metadata. Private dashboard and account pages are marked `noindex, nofollow`; `robots.txt` points crawlers to `/sitemap.xml`.
 
@@ -31,7 +31,8 @@ Set the correct timezone in `php.ini` (for example `date.timezone = Asia/Manila`
 ## Features
 
 - **Public hero page:** the root URL (`/`) shows a responsive landing page with Sign in / Sign up links when you are logged out. After login, the same URL becomes the role-aware dashboard — no separate dashboard pages. It includes SEO metadata, structured data, `robots.txt`, and `/sitemap.xml`; private pages are set to `noindex`.
-- **Signup with email confirmation:** clients register themselves and confirm a 24-hour email link; the account becomes active immediately after confirmation. Administrators can still disable or re-enable accounts from **Users**.
+- **Signup with email confirmation:** clients register themselves and confirm a 24-hour email link; the account becomes active immediately after confirmation. A math captcha protects the signup form. Administrators can still disable or re-enable accounts from **Users**.
+- **Password reset:** `forgot` accepts a registered, confirmed email with a math captcha and emails a single-use, 1-hour link to `reset`. Requests are limited to one per minute per account, and the page never reveals whether an email exists. This works for client accounts with a confirmed email; the installer-created administrator has no email address stored in the app.
 - **Multi-user, one app:** One Website Administrator manages the Admin Dashboard (accounts, website settings, backup/restore). POS users are labeled “Client” and see Cashier, Inventory, and Sales History. Settings and Log out live in the header account menu for both roles. API endpoints enforce these roles server-side and allow only one administrator.
 - **Cashier:** live name/barcode search, USB barcode scanner support (keyboard input + Enter), desktop/mobile browser camera scanner with camera selection (phones open the back camera by default), cart with stock limits, server-validated payments, automatic stock deduction, duplicate checkout prevention, 58mm/80mm printable receipts. Store name, address, and optional TIN ID and contact number are configurable under client **Settings** and appear in the receipt header.
 - **Inventory:** product cards, add/edit/archive/restore, add-stock modal with live preview, stock movement history, low-stock warnings and alert banner, Excel import with preview/validation/duplicate detection, Excel export, downloadable Excel template.
@@ -48,7 +49,7 @@ Registration is open, but new accounts cannot use the POS until their email is c
 1. Configure SMTP under **Website Settings** (or using `smtp_host`, `smtp_port`, `smtp_secure`, `smtp_user`, `smtp_pass`, `smtp_from`). `From Email` must be a valid sender address; leave it blank to use `SMTP Username` when that is a valid email address. Many providers reject mail from an unverified or fake sender.
 2. A cashier opens `signup` from the login/hero page and submits name, username, email, and password.
 3. The account is created as an inactive **Client** and a 24-hour confirmation link is emailed to them.
-4. The cashier opens the link in `activate`; the email is marked confirmed and the account becomes active immediately, so they can sign in without waiting for administrator approval. A welcome email with the username and sign-in link is sent after confirmation.
+4. The cashier opens the link in `activate`; the email is marked confirmed and the account becomes active immediately, so they can sign in without waiting for administrator approval. A welcome email with the username, sign-in link, and a reminder to update store details is sent after confirmation.
 5. If the email is lost, they can request a fresh link from `resend` (one request per minute).
 
 Changing an email address under **Account Settings** also requires a confirmation link sent to the new address; the new email is marked unverified until that link is opened. Changing an existing email requires SMTP to be configured first. Public signups always create Client accounts, never Website Administrators. Administrators can also create accounts with an email address from **Users**; those addresses are stored as verified. If the activation email cannot be sent, the pending account is removed automatically. A disabled account cannot reactivate itself by requesting a new activation link. Only one Website Administrator can exist and that account cannot be demoted, disabled, or deleted.
@@ -78,3 +79,5 @@ Backups contain `users`, `products`, `sales`, `sale_items`, `stock_movements`, a
 9. Check sales filters, chart, receipt reprinting, and filtered Excel export.
 10. Generate a backup, restore it, and verify the safety backup exists.
 11. Check the layout on desktop, tablet, and phone widths.
+12. Submit `signup` with a wrong and then a correct math captcha; confirm only the correct answer is accepted.
+13. Open `forgot`, request a reset with a wrong and then a correct captcha, use the emailed link, and sign in with the new password.

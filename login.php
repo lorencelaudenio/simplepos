@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label class="field" style="margin-top:14px">Password<input type="password" name="password" autocomplete="current-password" required></label>
       <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign In</button>
     </form>
-    <p class="auth-link" style="margin-top:18px;margin-bottom:0">New here? <a href="signup">Create a client account</a><br><span style="display:inline-block;margin-top:8px">Need to activate? <a href="resend">Resend activation email</a></span></p>
+    <p class="auth-link" style="margin-top:18px;margin-bottom:0">New here? <a href="signup">Create a client account</a><br><span style="display:inline-block;margin-top:8px">Forgot your password? <a href="forgot">Reset it</a><br>Need to activate? <a href="resend">Resend activation email</a></span></p>
   </main>
 </body>
 </html>

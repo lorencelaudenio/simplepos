@@ -133,6 +133,7 @@ function activation_create_token(
         'full_name' => $fullName,
         'email' => $email,
         'purpose' => $purpose === 'email_change' ? 'email_change' : 'signup',
+        'base_url' => activation_base_url(),
         'created_at' => date('Y-m-d H:i:s'),
         'expires_at' => date('Y-m-d H:i:s', time() + 24 * 3600),
         'last_sent_at' => date('Y-m-d H:i:s'),
@@ -185,9 +186,12 @@ function activation_base_url(): string
     return $scheme . '://' . $host;
 }
 
-function activation_url(string $token): string
+function activation_url(string $token, string $baseUrl = ''): string
 {
     $configured = trim((string)(getenv('POS_APP_URL') ?: ''));
+    if ($configured === '') {
+        $configured = trim($baseUrl);
+    }
     if ($configured !== '') {
         return rtrim($configured, '/') . '/activate?token=' . rawurlencode($token);
     }
@@ -207,7 +211,7 @@ function activation_send_email(array $activation): array
 {
     $website = get_setting('website_name', 'Simple Online POS') ?: 'Simple Online POS';
     $name = (string)($activation['full_name'] ?? 'there');
-    $link = activation_url((string)$activation['token']);
+    $link = activation_url((string)$activation['token'], (string)($activation['base_url'] ?? ''));
     $emailChange = ($activation['purpose'] ?? '') === 'email_change';
     $subject = $emailChange
         ? 'Confirm your new email address - ' . $website
@@ -223,9 +227,12 @@ function activation_send_email(array $activation): array
 }
 
 /** Build the public sign-in URL using only activation.php helpers. */
-function activation_login_url(): string
+function activation_login_url(string $baseUrl = ''): string
 {
     $configured = trim((string)(getenv('POS_APP_URL') ?: ''));
+    if ($configured === '') {
+        $configured = trim($baseUrl);
+    }
     if ($configured !== '') {
         return rtrim($configured, '/') . '/login';
     }
@@ -251,8 +258,9 @@ function activation_send_welcome_email(array $activation): void
     $body = "Hello " . ($name !== '' ? $name : 'there') . ",\n\n"
         . "Your email has been confirmed and your " . $website . " account is now active.\n\n"
         . ($username !== '' ? "Username: " . $username . "\n" : '')
-        . "Sign in: " . activation_login_url() . "\n\n"
+        . "Sign in: " . activation_login_url((string)($activation['base_url'] ?? '')) . "\n\n"
         . "You can now use the cashier, inventory, and sales tools.\n\n"
+        . "Remember to open the account menu and choose Settings to update your store name, address, receipt footer, and optional TIN/contact number before printing receipts.\n\n"
         . "— " . $website;
     send_pos_email($email, 'Welcome to ' . $website . ' - your account is active', $body);
 }
